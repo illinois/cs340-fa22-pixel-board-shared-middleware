@@ -150,25 +150,3 @@ A summary of the environment variables is given below:
 * `INITIAL_PALETTE` specifies the initial palette used, as a comma separated list of hex color codes (*without* a precedeing `#`).
     - For example, the following is the string corresponding to the initial 16 colors available in the 2022 version of Reddit's r/place: `ffffff,d4d7d9,898d90,000000,9c6926,ff99aa,b44ac0,811e9f,51e9f4,3690ea,2450a4,7eed56,00a368,ffd635,ffa800,ff4500`.
 * `PIXEL_RATE` specifies the number of milliseconds between pixel updates that are permitted for a specific PG.
-
----
-
-## Future Considerations
-
-This design of the middleware was designed to be scalable and easily adaptable to a number of new features. For example, all of the database interactions also occur with a local in-memory cache, so the server does not need to interact with the database for every request (and can instead execute database requests asynchronously).
-
-Rate limiting is already present in a robust and scalable manner; the rate limits are managed internally as entries in the database records for each server, so this scales as easily as the database does.
-
-Allowing humans to update the pixels via the frontend only requires updates to the frontend. Humans placing pixels can be seen by the middleware as PGs. After all, there is nothing different about a human placing pixels and a bot doing so, from the perspective of the middleware. Additionally, this system can prevent users from loading multiple frontends to make updates faster (as names/authors are required to provided and to be unique).
-
-Storing the state of the pixel board is already done in the database in an efficient manner, and a replay feature is already present in the GIF generation. The state of the pixel board is stored efficiently by only storing the updates (the minimal amount of information needed to recreate the pixel board), so this is also scalable.
-
-PGs can know the state of the pixel board in the same way as the frontend: by querying the `/pixels` and `/settings` routes.
-
-There is room to create more efficient communication about the state of the pixel board. As all of the updates are centralized in one place (in the `BoardManager`), it could be easily set up to send out single updates. These could be through websockets with the frontend, webhooks PGs could subscribe to, etc.
-
-Additional information about each pixel can also be easily stored. Each pixel update is stored as a document in a MongoDB collection, so a limitless number of additional fields could be added.
-
-Additionally, parameters about the board, such as the width, height, and palette could be changed during the running of the app (as was done in the 2022 version of Reddit's r/place). To implement this functionality, relatively few changes would be needed: there would need to be new types of updates added to the database (the flexibility of MongoDB allows for different types of changes) and the timelapse feature would need to be updated to account for these.
-
-The image is already persistent across restarts of the application, being stored in a separate database. There are no backup measures in place for if the database crashes/is restarted, but persisting data at this stage is outside of the scope of this application.
