@@ -1,6 +1,6 @@
 # CS 340's Course-Wide Shared Pixel Board Middleware
 
-This course-wide shared middleware was initially based of Sid's Week #1 submission, with modifications added by waf from the Week #1 submissions of Yuqing, Garrett, Han, Yutong, Maya, Willie, Max, Owen H., Alekhya, and Xinze.
+This course-wide shared middleware was initially based of Sid Bhushan's Week #1 submission, with modifications added by waf from the Week #1 submissions of Yuqing, Garrett, Han, Yutong, Maya, Willie, Max, Owen H., Alekhya, and Xinze.
 
 
 ## High-Level Overview
