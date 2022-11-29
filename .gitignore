@@ -1,0 +1,10 @@
+# .env file (since this should be changed depending on what the system is)
+.env
+
+# Temp directory
+tmp/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class

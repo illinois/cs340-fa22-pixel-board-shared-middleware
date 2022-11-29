@@ -1,0 +1,92 @@
+body {
+  background-color: #f8f8fb;
+}
+
+canvas {
+  border: solid 1px black;
+}
+
+footer {
+  color: hsla(13, 97%, 92%, 1);
+  font-size: 14px;
+  background-color: #DD3403;
+  border-top: dotted 1px white;
+}
+
+footer a {
+  color: white;
+}
+
+footer a:hover {
+  color: white;
+}
+
+/*
+h1, h2 {
+  color: #333;
+  font-weight: bold;
+  font-family: 'Archivo', sans-serif;
+}
+
+.content {
+  font-family: 'Archivo', sans-serif;
+  font-size: 18px;
+}
+*/
+.code-output-block {
+  border: dotted 1px #666;
+  background-color: white;
+  padding: 10px 20px;
+}
+
+h1, h2 {
+  color: #333;
+  font-weight: bold;
+  font-family: 'Archivo', serif;
+}
+
+h1 {
+  font-size: 42px;
+}
+
+h2 {
+  font-size: 36px;
+  margin-top: 30px;
+}
+
+.content {
+  font-family: 'Archivo', sans-serif;
+  font-size: 18px;
+}
+
+.content a {
+  color: #DD3403;
+}
+
+
+.navbar {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.navbar-brand {
+  font-family: 'Share Tech Mono', monospace;  
+  font-weight: bold;
+  color: white !important;
+  line-height: 90%;
+  text-transform: uppercase;
+  font-size: 20px;
+}
+
+header {
+  background-color: #DD3403;
+  border-bottom: dotted 1px #333;
+}
+
+.nav-item a {
+  color: white !important;
+}
+
+nav a {
+  color: hsla(222, 100%, 19%, 1) !important;  
+}

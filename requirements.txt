@@ -1,0 +1,8 @@
+flask
+pymongo
+dotenv
+flask_socketio
+requests
+eventlet
+gevent
+gevent-websocket
