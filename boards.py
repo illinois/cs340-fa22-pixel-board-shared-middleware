@@ -22,6 +22,9 @@ else:
         ["#B3E2E2", "#7EA7DF", "#F0A099", "#6F6E69", "F8F075", "#FFFFFF", "#E5E5E5"],
         ["#000000", "#FFFFFF", "#FF0000", "#00FF00", "#0000FF"],
         ["#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FF69B4", "#FFFF00", "#FFA500", "#FFC0CB",  "#800080", "#000000", "#808080", "#FF00FF", "#00FFFF", "#40E0D0", "#ADD8E6", "#90EE90", "#FFB6C1", "#FFFFE0", "#D3D3D3", "#AA7A6F", "#BA648C", "#164F82"],
+
+        # Reddit r/place in 2022:
+        ["#ffffff" ,"#d4d7d9" ,"#898d90" ,"#000000", "#9c6926", "#ff99aa" ,"#b44ac0", "#811e9f", "#51e9f4" , "#3690ea" ,"#2450a4", "#7eed56", "#00a368", "#ffd635", "#ffa800", "#ff4500"],
     ])
 
 TEMP_DIR = getenv("TEMP_DIR") or "tmp"
