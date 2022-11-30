@@ -34,10 +34,7 @@ let initBoard = function() {
     fetch(`/changeByClick/${x}/${y}/${_colorChoice}/${_netid}/`)
   }, false);
 
-  _enableToken = document.getElementById("enable")
-  _enableToken.addEventListener('click', function(event){
-    _netid = document.getElementById("netid").value
-  }, false);
+  initalizeSecret();
 
   initalizeSelector();
 
@@ -100,4 +97,11 @@ let initalizeSelector = function() {
     })
     colorSelect.append(option)
   }
+}
+
+let initalizeSecret = function() {
+  _enableToken = document.getElementById("enable")
+  _enableToken.addEventListener('click', function(event){
+  _netid = document.getElementById("netid").value
+  }, false);
 }
