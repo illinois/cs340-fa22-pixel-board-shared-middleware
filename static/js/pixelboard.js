@@ -1,6 +1,11 @@
 var _settings = undefined;
 var _canvas = undefined;
 var _sio = undefined;
+var _netid = undefined;
+var _netidText = undefined;
+var _enableToken = undefined;
+var _colorChoice = undefined;
+var _previousChoice = undefined;
 
 // Fetch the settings:
 fetch("/settings")
@@ -17,6 +22,43 @@ let initBoard = function() {
   _canvas.width = _settings.width * 3;
   _canvas.id = "canvas"
   _canvas.getContext("2d").scale(3, 3);
+  _canvas.addEventListener('click', function(event) {
+    if(_netid === undefined || _colorChoice === undefined) {
+      return;
+    }
+    var elem = document.getElementById('canvas'),
+    elemLeft = elem.offsetLeft + elem.clientLeft,
+    elemTop = elem.offsetTop + elem.clientTop,
+    y = parseInt((event.pageX - elemLeft) / 3),
+    x = parseInt((event.pageY - elemTop) / 3);
+    fetch(`/changeByClick/${x}/${y}/${_colorChoice}/${_netid}/`)
+  }, false);
+
+  _enableToken = document.getElementById("enable")
+  _enableToken.addEventListener('click', function(event){
+    _netid = document.getElementById("netid").value
+  }, false);
+
+  // Initialize the color selector
+  var colorSelect = document.getElementById("selector")
+  for(var i = 0; i < _settings.palette.length; i++) {
+    var option = document.createElement("div")
+    option.style.backgroundColor = _settings.palette[i]
+    option.setAttribute('value', i)
+    option.style.height = '20px'
+    option.style.width = '42px'
+    option.style.display = 'inline-block'
+    option.addEventListener('click', function(event) {
+      if(_previousChoice !== undefined) {
+        _previousChoice.style.outline = ''
+      }
+
+      _colorChoice = event.target.getAttribute("value")
+      event.target.style.outline = "solid blue 3px";
+      _previousChoice = event.target;
+    })
+    colorSelect.append(option)
+  }
 
   document.getElementById("pixelboard").appendChild(_canvas);
 

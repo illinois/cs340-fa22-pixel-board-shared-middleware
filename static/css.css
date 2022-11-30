@@ -90,3 +90,16 @@ header {
 nav a {
   color: hsla(222, 100%, 19%, 1) !important;  
 }
+
+#selector {
+  display: flex; 
+  flex-direction: row; 
+  justify-content: left; 
+  margin: 0px auto; 
+  gap: 4px; 
+  flex-wrap: wrap; 
+  position: relative; 
+  align-items: center;
+  width: auto;
+  width: 320px;
+}
