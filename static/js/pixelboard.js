@@ -39,26 +39,7 @@ let initBoard = function() {
     _netid = document.getElementById("netid").value
   }, false);
 
-  // Initialize the color selector
-  var colorSelect = document.getElementById("selector")
-  for(var i = 0; i < _settings.palette.length; i++) {
-    var option = document.createElement("div")
-    option.style.backgroundColor = _settings.palette[i]
-    option.setAttribute('value', i)
-    option.style.height = '20px'
-    option.style.width = '42px'
-    option.style.display = 'inline-block'
-    option.addEventListener('click', function(event) {
-      if(_previousChoice !== undefined) {
-        _previousChoice.style.outline = ''
-      }
-
-      _colorChoice = event.target.getAttribute("value")
-      event.target.style.outline = "solid blue 3px";
-      _previousChoice = event.target;
-    })
-    colorSelect.append(option)
-  }
+  initalizeSelector();
 
   document.getElementById("pixelboard").appendChild(_canvas);
 
@@ -97,3 +78,26 @@ let initBoard = function() {
     })
   })
 };
+
+let initalizeSelector = function() {
+  // Initialize the color selector
+  var colorSelect = document.getElementById("selector")
+  for(var i = 0; i < _settings.palette.length; i++) {
+    var option = document.createElement("div")
+    option.style.backgroundColor = _settings.palette[i]
+    option.setAttribute('value', i)
+    option.style.height = '20px'
+    option.style.width = '42px'
+    option.style.display = 'inline-block'
+    option.addEventListener('click', function(event) {
+      if(_previousChoice !== undefined) {
+        _previousChoice.style.outline = ''
+      }
+
+      _colorChoice = event.target.getAttribute("value")
+      event.target.style.outline = "solid blue 3px";
+      _previousChoice = event.target;
+    })
+    colorSelect.append(option)
+  }
+}
