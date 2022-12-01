@@ -8,6 +8,7 @@ from flask_socketio import SocketIO
 
 from servers import ServerManager
 from boards import BoardManager
+from FrontendManager import FrontendManager
 
 # Load the environment variables
 load_dotenv()
@@ -29,10 +30,12 @@ secrets_file.close()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = getenv("SECRET_KEY") or "This is not secret."
 
-# Create a SocketIO app for 
+# Create a SocketIO app for
 sio = SocketIO(app, cors_allowed_origins="*")
 
 # Serving Frontend
+
+
 @app.route('/', methods=['GET'])
 def GET_index():
     '''Route for "/" (frontend)'''
@@ -62,15 +65,18 @@ def PUT_register_pg():
         return resp
 
     # Add the server and return the id
-    id = server_manager.add_server(request.json["name"], request.json["author"])
+    id = server_manager.add_server(
+        request.json["name"], request.json["author"])
     return jsonify({
         "id": id
     })
+
 
 @app.route('/remove-pg', methods=['DELETE'])
 def DELETE_remove_pg():
     server_manager.remove_server(request.json["id"])
     return jsonify({"success": True}), 200
+
 
 @app.route('/update-pixel', methods=['PUT'])
 def PUT_update_pixel():
@@ -147,12 +153,13 @@ def GET_pixels():
     # Check if the client has this cached
     if request.if_none_match.contains(board["hash"]):
         return "", 304
-    resp =  make_response(jsonify({
+    resp = make_response(jsonify({
         "pixels": board["pixels"]
     }))
     # Add the etag
     resp.headers["ETag"] = board["hash"]
     return resp
+
 
 @app.route('/timelapse', methods=['GET'])
 def GET_timelapse():
@@ -161,5 +168,11 @@ def GET_timelapse():
     # Serve the file here
     return send_file(timelapse_path), 200
 
+
+@app.route('/changeByClick', methods=['POST'])
+def changeByClick():
+    return PUT_update_pixel()
+
 if __name__ == '__main__':
-    sio.run(app, getenv("HOST") or "127.0.0.1", getenv("PORT") or 5000, debug=True)
+    sio.run(app, getenv("HOST") or "127.0.0.1",
+            getenv("PORT") or 5000, debug=True)

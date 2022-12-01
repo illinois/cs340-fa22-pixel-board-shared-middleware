@@ -1,4 +1,3 @@
-dotenv
 eventlet
 flask
 flask_socketio
@@ -6,4 +5,5 @@ gevent
 gevent-websocket
 json
 pymongo
+python-dotenv
 requests
