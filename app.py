@@ -157,8 +157,11 @@ def GET_timelapse():
 @app.route('/changeByClick', methods=['POST'])
 def changeByClick():
     body = request.json
+    # If no json file return 401
     if not body:
         return "No json file", 401
+
+    # If requested fields are not privided return 402
     for required in ['row', 'col', 'color', 'id']:
         if body[required] == None:
             return f'{required} is missed in body', 402
@@ -168,8 +171,11 @@ def changeByClick():
     color = int(body['color'])
     id = body['id']
 
+    # Pass to frontend_manager
     result = frontend_manager.updateChange(
         id=id, row=row, col=col, color=color)
+
+    # If update is successful, trigger an event
     if result[1] == 200:
         sio.emit('pixel update', {
             'row': row,
@@ -177,6 +183,15 @@ def changeByClick():
             'color': color
         })
     return result
+
+
+@app.route('/servers', methods=['GET'])
+def getServers():
+    # Route for render server page
+    servers = server_manager.cache
+    sort_servers = sorted(servers, key=lambda e: e['author'])
+
+    return render_template('server.html', data={"servers": sort_servers})
 
 
 if __name__ == '__main__':
