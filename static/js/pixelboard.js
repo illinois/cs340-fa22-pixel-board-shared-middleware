@@ -53,5 +53,47 @@ let initBoard = function() {
       ctx.fillStyle = color;
       ctx.fillRect(x, y, 1, 1);
     })
+
+    // hoover 
+    const canvas = document.getElementById('canvas')
+    function getCursorPosition(canvas, event) {
+      var elemLeft = canvas.offsetLeft + canvas.clientLeft;
+      var elemTop = canvas.offsetTop + canvas.clientTop;
+      x = parseInt((event.pageX - elemLeft) / 3);
+      y = parseInt((event.pageY - elemTop) / 3);
+      console.log("x: " + x + " y: " + y)
+      return [x,y]
+    }   
+    canvas.addEventListener('mousemove', function(e) {
+      e.preventDefault();
+      var [x,y] = getCursorPosition(canvas, e);
+      const hidden = document.getElementById('mouse_over');
+      hidden.style.visibility = 'visible';
+      var tmpx = e.clientX;
+      var tmpy = e.clientY;
+      hidden.style.position = "absolute";
+      hidden.style.left = `${tmpx}px`;
+      hidden.style.top = `${tmpy}px`;
+      
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ coordX:x,coordY:y })
+      };
+      fetch('/getPixelAuthor', requestOptions)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data.PixelAuthor);
+        hidden.innerHTML = data.PixelAuthor;
+      })
+    })
+    canvas.addEventListener('mouseout', (event) => {
+      const hidden = document.getElementById('mouse_over');
+      function delay(time) {
+        return new Promise(resolve => setTimeout(resolve, time));
+      }
+      delay(1000).then(() => {hidden.style.visibility = 'hidden';});
+    });
   })
 };
+
