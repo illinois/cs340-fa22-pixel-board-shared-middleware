@@ -1,6 +1,6 @@
 flask
 pymongo
-dotenv
+python-dotenv
 flask_socketio
 requests
 eventlet
