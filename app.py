@@ -1,4 +1,5 @@
 from os import getenv
+import os
 import json
 
 from dotenv import load_dotenv
@@ -22,9 +23,12 @@ board_manager = BoardManager(db)
 server_manager = ServerManager(db, board_manager)
 
 # Gather secrets
-secrets_file = open("secrets.json")
-secrets = set(json.load(secrets_file)["secrets"])
-secrets_file.close()
+if os.path.exists("secrets.json")
+    secrets_file = open("secrets.json")
+    secrets = set(json.load(secrets_file)["secrets"])
+    secrets_file.close()
+else:
+    secrets = None
 
 # Get app context
 app = Flask(__name__)
@@ -56,7 +60,7 @@ def PUT_register_pg():
             return resp
     
     # Ensure that secret is in the list of secrets
-    if request.json["secret"] not in secrets:
+    if secrets and request.json["secret"] not in secrets:
         resp = make_response(jsonify({
             "success": False,
             "error": f"Secret was not in list of valid secrets!",
