@@ -2,10 +2,9 @@
 
 This course-wide shared middleware was initially based of Sid Bhushan's Week #1 submission, with modifications added by waf from the Week #1 submissions of Yuqing, Garrett, Han, Yutong, Maya, Willie, Max Fan, Owen H., Alekhya, and Xinze.
 
-
 ## High-Level Overview
 
-![Pixel Board High-level Diagram](docs/high_level.png 'High-level Diagram')
+![Pixel Board High-level Diagram](docs/high_level.png "High-level Diagram")
 
 The full pixel board application consists of three primary components:
 
@@ -25,12 +24,12 @@ Note that, prior to sending pixel updates, PGs must "register" with the middlewa
 
 ## Launching the Shared Middleware
 
-The shared middleware requires `mongo` as a database server.  Launch mongo, then the app:
+The shared middleware requires `mongo` as a database server. Launch mongo, then the app:
 
 - `docker run --rm -it -p 27017:27017 mongo`
 - Either of the following:
-    - In HTTP mode: `py -m flask run` / `python3 -m flask run`
-    - In WebSocket mode: `py app.py` / `python3 app.py`
+  - In HTTP mode: `py -m flask run` / `python3 -m flask run`
+  - In WebSocket mode: `py app.py` / `python3 app.py`
 
 ---
 
@@ -44,7 +43,7 @@ All communication between the PGs and middleware occurs through HTTP requests. H
 
 This is the request used to register a PG with the middleware. Every PG should initially call this request to add themself to the middleware.
 
-Request Data: JSON containing the keys `"name"`, `"author"` and `"secret"`.  The `"secret"` string can be any value right now, but must be present.
+Request Data: JSON containing the keys `"name"`, `"author"` and `"secret"`. The `"secret"` string can be any value right now, but must be present.
 
 Response Status Codes: The status code `200 OK` is returned if the PG is successfully added.
 
@@ -124,6 +123,16 @@ Response Data: A GIF (the `Content-Type` is `image/gif`) containing an animated 
 
 ---
 
+**POST** `/changeByClick`
+
+This route receives a json file from the frontend and updates the pixel.
+
+Response Status Codes: If the update is successful, a `200 Success` is sent. If the update is successful, a `400 Too frequent update` is sent. If the json file is missing, a `401 No json file` is sent. If the required field in the json file is missing, a `402 Missing attributes` is sent.
+
+---
+
+**Note:** The FrontendManager is responsible for checking the timestamp and secret for the requst. The required request interval can be changed by changing the constant `time_gap` which is set to 3 seconds by default.
+
 ## Technical Details About Middleware
 
 ### Dependencies
@@ -134,19 +143,19 @@ There are a number of Python packages used by the middleware, namely Flask (as a
 
 ### WebSocket Support
 
-Instead of using active pulling, after the initial state is transferred via `GET /pixels`, all updates are sent using WebSockets (specifically, `socket.io`).  Since `socketio` gives server ability to actively emit event to client, the front-end could update the pixel in real-time while using least bandwidth. The `socketio` is also faster at communicating.
+Instead of using active pulling, after the initial state is transferred via `GET /pixels`, all updates are sent using WebSockets (specifically, `socket.io`). Since `socketio` gives server ability to actively emit event to client, the front-end could update the pixel in real-time while using least bandwidth. The `socketio` is also faster at communicating.
 
 To use `socketio`, you must have all requirements installed in `requirements.txt` **AND** run it using `python app.py` instead of with `flask run`.
 
 ### Environment Variables
 
-There are a number of configurable components to the middleware that should be specified through environment variables.  All environment variables have reasonable hard-coded default values.  These can either be loaded as environment variables prior to the program's start (using whatever mechanisms are provided by the OS) or placed into a `.env` file (from where they will be loaded at startup.)
+There are a number of configurable components to the middleware that should be specified through environment variables. All environment variables have reasonable hard-coded default values. These can either be loaded as environment variables prior to the program's start (using whatever mechanisms are provided by the OS) or placed into a `.env` file (from where they will be loaded at startup.)
 
 A summary of the environment variables is given below:
 
-* `MONGO_HOST` and `MONGO_PORT` specify the host and port, respectively, of the MongoDB instance.
-* `TEMP_DIR` specifies the location of a temporary directory the middleware can create, write to, and read files from. This is used to store the files sent by the `/timelapse` route.
-* `INITIAL_WIDTH` and `INITIAL_HEIGHT` specify the initial dimensions of the pixel board.
-* `INITIAL_PALETTE` specifies the initial palette used, as a comma separated list of hex color codes (*without* a precedeing `#`).
-    - For example, the following is the string corresponding to the initial 16 colors available in the 2022 version of Reddit's r/place: `ffffff,d4d7d9,898d90,000000,9c6926,ff99aa,b44ac0,811e9f,51e9f4,3690ea,2450a4,7eed56,00a368,ffd635,ffa800,ff4500`.
-* `PIXEL_RATE` specifies the number of milliseconds between pixel updates that are permitted for a specific PG.
+- `MONGO_HOST` and `MONGO_PORT` specify the host and port, respectively, of the MongoDB instance.
+- `TEMP_DIR` specifies the location of a temporary directory the middleware can create, write to, and read files from. This is used to store the files sent by the `/timelapse` route.
+- `INITIAL_WIDTH` and `INITIAL_HEIGHT` specify the initial dimensions of the pixel board.
+- `INITIAL_PALETTE` specifies the initial palette used, as a comma separated list of hex color codes (_without_ a precedeing `#`).
+  - For example, the following is the string corresponding to the initial 16 colors available in the 2022 version of Reddit's r/place: `ffffff,d4d7d9,898d90,000000,9c6926,ff99aa,b44ac0,811e9f,51e9f4,3690ea,2450a4,7eed56,00a368,ffd635,ffa800,ff4500`.
+- `PIXEL_RATE` specifies the number of milliseconds between pixel updates that are permitted for a specific PG.

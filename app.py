@@ -154,12 +154,22 @@ def GET_timelapse():
     return send_file(timelapse_path), 200
 
 
-@app.route('/changeByClick/<r>/<c>/<color>/<id>/', methods=['GET'])
-def changeByClick(r, c, color, id):
-    row = int(r)
-    col = int(c)
+@app.route('/changeByClick', methods=['POST'])
+def changeByClick():
+    body = request.json
+    if not body:
+        return "No json file", 401
+    for required in ['row', 'col', 'color', 'id']:
+        if body[required] == None:
+            return f'{required} is missed in body', 402
+
+    row = int(body['row'])
+    col = int(body['col'])
+    color = int(body['color'])
+    id = body['id']
+
     result = frontend_manager.updateChange(
-        id=id, row=row, col=col, color=int(color))
+        id=id, row=row, col=col, color=color)
     if result[1] == 200:
         sio.emit('pixel update', {
             'row': row,

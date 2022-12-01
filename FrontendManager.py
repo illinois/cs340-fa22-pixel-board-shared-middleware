@@ -2,7 +2,7 @@ import datetime
 
 
 class FrontendManager:
-    timeInterval = 3
+    time_gap = 3
 
     def __init__(self, board) -> None:
         self.frontends = {}
@@ -26,7 +26,7 @@ class FrontendManager:
             return "Success", 200
 
         else:
-            if self.frontends[id] + datetime.timedelta(0, FrontendManager.timeInterval) < datetime.datetime.now():
+            if self.frontends[id] + datetime.timedelta(0, FrontendManager.time_gap) < datetime.datetime.now():
                 self.frontends[id] = datetime.datetime.now()
                 self.board.update_current_board(
                     row, col, int(color))

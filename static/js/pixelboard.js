@@ -1,8 +1,7 @@
 var _settings = undefined;
 var _canvas = undefined;
 var _sio = undefined;
-var _netid = undefined;
-var _netidText = undefined;
+var _secret = undefined;
 var _enableToken = undefined;
 var _colorChoice = undefined;
 var _previousChoice = undefined;
@@ -23,15 +22,22 @@ let initBoard = function() {
   _canvas.id = "canvas"
   _canvas.getContext("2d").scale(3, 3);
   _canvas.addEventListener('click', function(event) {
-    if(_netid === undefined || _colorChoice === undefined) {
+    if(_secret === undefined || _colorChoice === undefined) {
       return;
     }
     var elem = document.getElementById('canvas'),
     elemLeft = elem.offsetLeft + elem.clientLeft,
     elemTop = elem.offsetTop + elem.clientTop,
-    y = parseInt((event.pageX - elemLeft) / 3),
-    x = parseInt((event.pageY - elemTop) / 3);
-    fetch(`/changeByClick/${x}/${y}/${_colorChoice}/${_netid}/`)
+    col = parseInt((event.pageX - elemLeft) / 3),
+    row = parseInt((event.pageY - elemTop) / 3);
+    fetch(`/changeByClick`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ "id": _secret, "row": row, "col": col, "color": _colorChoice})
+    })
   }, false);
 
   initalizeSecret();
@@ -102,6 +108,6 @@ let initalizeSelector = function() {
 let initalizeSecret = function() {
   _enableToken = document.getElementById("enable")
   _enableToken.addEventListener('click', function(event){
-  _netid = document.getElementById("netid").value
+  _secret = document.getElementById("netid").value
   }, false);
 }
