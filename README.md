@@ -129,8 +129,6 @@ This route receives a json file from the frontend and updates the pixel.
 
 Response Status Codes: If the update is successful, a `200 Success` is sent. If the update is successful, a `400 Too frequent update` is sent. If the json file is missing, a `401 No json file` is sent. If the required field in the json file is missing, a `402 Missing attributes` is sent.
 
----
-
 **Note:** The FrontendManager is responsible for checking the timestamp and secret for the requst. The required request interval can be changed by changing the constant `time_gap` which is set to 3 seconds by default.
 
 ## Technical Details About Middleware
