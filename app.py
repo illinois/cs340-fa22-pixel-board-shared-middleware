@@ -22,7 +22,7 @@ server_manager = ServerManager(db, board_manager)
 
 # Gather secrets
 secrets_file = open("secrets.json")
-secrets = json.load(secrets_file)["secrets"]
+secrets = set(json.load(secrets_file)["secrets"])
 secrets_file.close()
 
 # Get app context
