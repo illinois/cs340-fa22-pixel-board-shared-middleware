@@ -186,7 +186,7 @@ def changeByClick():
 
 
 @app.route('/servers', methods=['GET'])
-def getServers():
+def GET_servers():
     # Route for render server page
     servers = server_manager.cache
     sort_servers = sorted(servers, key=lambda e: e['author'])
