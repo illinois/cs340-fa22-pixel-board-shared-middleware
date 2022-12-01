@@ -1,4 +1,5 @@
 from os import getenv
+import json
 
 from dotenv import load_dotenv
 from pymongo import MongoClient
@@ -18,6 +19,11 @@ db = mongo_client["project-pixel"]
 # Create the server manager (manages PGs) and board manager (manages pixel boards)
 board_manager = BoardManager(db)
 server_manager = ServerManager(db, board_manager)
+
+# Gather secrets
+secrets_file = open("secrets.json")
+secrets = json.load(secrets_file)["secrets"]
+secrets_file.close()
 
 # Get app context
 app = Flask(__name__)
@@ -45,6 +51,15 @@ def PUT_register_pg():
             }))
             resp.status_code = 400
             return resp
+    
+    # Ensure that secret is in the list of secrets
+    if request.json["secret"] not in secrets:
+        resp = make_response(jsonify({
+            "success": False,
+            "error": f"Secret was not in list of valid secrets!",
+        }))
+        resp.status_code = 400
+        return resp
 
     # Add the server and return the id
     id = server_manager.add_server(request.json["name"], request.json["author"])

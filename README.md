@@ -150,3 +150,10 @@ A summary of the environment variables is given below:
 * `INITIAL_PALETTE` specifies the initial palette used, as a comma separated list of hex color codes (*without* a precedeing `#`).
     - For example, the following is the string corresponding to the initial 16 colors available in the 2022 version of Reddit's r/place: `ffffff,d4d7d9,898d90,000000,9c6926,ff99aa,b44ac0,811e9f,51e9f4,3690ea,2450a4,7eed56,00a368,ffd635,ffa800,ff4500`.
 * `PIXEL_RATE` specifies the number of milliseconds between pixel updates that are permitted for a specific PG.
+
+### Secrets
+
+Secrets are used when a PG registers itself. Each PG should have a secret that matches one found in a hidden file `secrets.json`.
+
+`secrets.json` should include a JSON list with the name "secrets", like this:
+`{"secrets" : ["first", "second", "taylor", "mm isn't here"]}`
