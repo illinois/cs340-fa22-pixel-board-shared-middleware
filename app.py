@@ -9,7 +9,6 @@ from flask_socketio import SocketIO
 
 from servers import ServerManager
 from boards import BoardManager
-from FrontendManager import FrontendManager
 
 # Load the environment variables
 load_dotenv()
