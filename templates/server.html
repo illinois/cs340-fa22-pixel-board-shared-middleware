@@ -1,8 +1,12 @@
+<!-- This html file is modified from CS240 2022 Spring Final Project -->
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
 
 <title>CS 340 Pixel Board</title>
 
@@ -10,13 +14,23 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 <link href="https://fonts.googleapis.com/css2?family=Archivo&family=Neuton&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
+      crossorigin="anonymous"
+    />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
-
+<script
+      src="https://code.jquery.com/jquery-3.5.1.min.js"
+      integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+      crossorigin="anonymous"
+    ></script>
 <link href="/static/css.css" rel="stylesheet"/>
  
 </head>
 
-<body class="d-flex flex-column justify-content-between min-vh-100">  
+<body class="d-flex flex-column min-vh-100">  
   <header class="py-1 mb-3">
     <div class="container">
       <nav class="navbar navbar-expand-md navbar-dark">
@@ -39,20 +53,28 @@
       </nav>
     </div>
   </header>
-
-  <form style="text-align: center">
-    <label for="fname">Secret:</label><br>
-    <input type="text" name="fname" id="secretTextBox" style="margin: 2px;"><br>
-    <input type="button" class="btn btn-secondary" value="Enable Frontend Edit" id="enable">    
-  </form>
-
-  <br>
-  
-  <div id="selector"></div>
-
-  <main class="content container flex-grow-1 mb-2">
-    <div id="pixelboard" style="text-align: center"></div>
-  </main>
-  <script type="text/javascript" src="/static/js/pixelboard.js"></script>
+  <div class="container my-2 py-2">
+    <div class="display-4">Servers</div>
+    
+    <table class="table">
+      <tr>
+        <th>Name</th>
+        <th>Author</th>
+        <th>Number of Pixels Generated</th>
+      </tr>
+      {% for server in data.servers %}
+      <tr {% if loop.index > 1 and loop.previtem["author"] != server["author"] %}style="border-top: solid 2px black"{% endif %}>
+        <td>
+          {{ server["name"] }}
+          <!--TODO: Enable single PG showcase -->
+          <!-- <a href="">{{ server["name"] }}</a> -->
+        </td>
+        <td>{{ server["author"] }}</td>
+        <!-- TODO: enable displaying number of pixels occupied, can be done with Issue4-->
+        <td>&mdash;</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
 </body>
 </html>

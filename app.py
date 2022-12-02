@@ -178,6 +178,15 @@ def GET_timelapse():
 def changeByClick():
     return PUT_update_pixel()
 
+@app.route('/servers', methods=['GET'])
+def GET_servers():
+    # Route for render server page
+    servers = server_manager.cache
+    sort_servers = sorted(servers, key=lambda e: e['author'])
+
+    return render_template('server.html', data={"servers": sort_servers})
+
+
 if __name__ == '__main__':
     sio.run(app, getenv("HOST") or "127.0.0.1",
             getenv("PORT") or 5000, debug=True)
