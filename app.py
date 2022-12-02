@@ -23,7 +23,7 @@ board_manager = BoardManager(db)
 server_manager = ServerManager(db, board_manager)
 
 # Gather secrets
-if os.path.exists("secrets.json")
+if os.path.exists("secrets.json"):
     secrets_file = open("secrets.json")
     secrets = set(json.load(secrets_file)["secrets"])
     secrets_file.close()
@@ -57,6 +57,7 @@ def PUT_register_pg():
                 "error": f"Required field `{requiredField}` not present.",
             }))
             resp.status_code = 400
+            print(resp)
             return resp
     
     # Ensure that secret is in the list of secrets
@@ -66,6 +67,7 @@ def PUT_register_pg():
             "error": f"Secret was not in list of valid secrets!",
         }))
         resp.status_code = 400
+        print(resp)
         return resp
 
     # Add the server and return the id
