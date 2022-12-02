@@ -1,4 +1,6 @@
 from os import getenv
+import os
+import json
 
 from dotenv import load_dotenv
 from pymongo import MongoClient
@@ -7,7 +9,6 @@ from flask_socketio import SocketIO
 
 from servers import ServerManager
 from boards import BoardManager
-from FrontendManager import FrontendManager
 
 # Load the environment variables
 load_dotenv()
@@ -19,7 +20,15 @@ db = mongo_client["project-pixel"]
 # Create the server manager (manages PGs) and board manager (manages pixel boards)
 board_manager = BoardManager(db)
 server_manager = ServerManager(db, board_manager)
-frontend_manager = FrontendManager(board=board_manager)
+
+# Gather secrets
+if os.path.exists("secrets.json"):
+    secrets_file = open("secrets.json")
+    secrets = set(json.load(secrets_file)["secrets"])
+    secrets_file.close()
+else:
+    secrets = None
+
 # Get app context
 app = Flask(__name__)
 app.config['SECRET_KEY'] = getenv("SECRET_KEY") or "This is not secret."
@@ -47,7 +56,18 @@ def PUT_register_pg():
                 "error": f"Required field `{requiredField}` not present.",
             }))
             resp.status_code = 400
+            print(resp)
             return resp
+    
+    # Ensure that secret is in the list of secrets
+    if secrets and request.json["secret"] not in secrets:
+        resp = make_response(jsonify({
+            "success": False,
+            "error": f"Secret was not in list of valid secrets!",
+        }))
+        resp.status_code = 400
+        print(resp)
+        return resp
 
     # Add the server and return the id
     id = server_manager.add_server(
@@ -156,28 +176,7 @@ def GET_timelapse():
 
 @app.route('/changeByClick', methods=['POST'])
 def changeByClick():
-    body = request.json
-    if not body:
-        return "No json file", 401
-    for required in ['row', 'col', 'color', 'id']:
-        if body[required] == None:
-            return f'{required} is missed in body', 402
-
-    row = int(body['row'])
-    col = int(body['col'])
-    color = int(body['color'])
-    id = body['id']
-
-    result = frontend_manager.updateChange(
-        id=id, row=row, col=col, color=color)
-    if result[1] == 200:
-        sio.emit('pixel update', {
-            'row': row,
-            'col': col,
-            'color': color
-        })
-    return result
-
+    return PUT_update_pixel()
 
 if __name__ == '__main__':
     sio.run(app, getenv("HOST") or "127.0.0.1",
