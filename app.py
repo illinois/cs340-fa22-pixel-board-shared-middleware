@@ -146,13 +146,10 @@ def GET_timelapse():
     # Serve the file here
     return send_file(timelapse_path), 200
 
-@app.route('/getPixelAuthor', methods=['POST'])
-def getPixelAuthor():
-    data = request.json
-    x = data['coordX']
-    y = data['coordY']
+@app.route('/getPixelAuthor/<col>/<row>', methods=['GET'])
+def getPixelAuthor(col,row):
     board = board_manager.get_current_board()
-    author = board["lastModify"][y][x]
+    author = board["lastModify"][int(row)][int(col)]
     tmp = {"PixelAuthor": author}
     return jsonify(tmp), 200
 

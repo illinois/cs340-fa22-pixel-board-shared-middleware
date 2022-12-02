@@ -66,24 +66,18 @@ let initBoard = function() {
     }   
     canvas.addEventListener('mousemove', function(e) {
       e.preventDefault();
-      var [x,y] = getCursorPosition(canvas, e);
+      var [col,row] = getCursorPosition(canvas, e);
       const hidden = document.getElementById('mouse_over');
       hidden.style.visibility = 'visible';
-      var tmpx = e.clientX;
-      var tmpy = e.clientY;
+      var tmpcol = e.clientX;
+      var tmprow = e.clientY;
       hidden.style.position = "absolute";
-      hidden.style.left = `${tmpx}px`;
-      hidden.style.top = `${tmpy}px`;
+      hidden.style.left = `${tmpcol}px`;
+      hidden.style.top = `${tmprow}px`;
       
-      const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ coordX:x,coordY:y })
-      };
-      fetch('/getPixelAuthor', requestOptions)
+      fetch(`/getPixelAuthor/${col}/${row}`)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data.PixelAuthor);
         hidden.innerHTML = data.PixelAuthor;
       })
     })
