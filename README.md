@@ -67,7 +67,7 @@ Response Data: JSON containing a single key `"success"`, which is boolean indica
 
 ---
 
-**PUT** `/update-pixels`
+**PUT** `/update-pixel`
 
 This request is used by a PG to update a pixel on the board. They need to have registered first, using the `/register-pg` route. Note that this request is rate limited to restrict how fast PGs can add pixels to the middleware.
 
