@@ -129,9 +129,17 @@ This route receives a json file from the frontend and updates the pixel.
 
 Request Data: JSON containing the keys `"secret"`, `"row"`, `"col"` and `"color"`. The `"secret"` string can be any value right now, but must be present.
 
-Response Status Codes: If the update is successful, a `200 Success` is sent. If the update is successful, a `400 Too frequent update` is sent. If the json file is missing, a `401 No json file` is sent. If the required field in the json file is missing, a `402 Missing attributes` is sent.
+Response Status Codes: If everything is okay and the pixel is updated, `200 OK` is returned. If the response has an invalid token (i.e. the PG isn't registered), `401 Unauthorized` is returned. Finally, if the PG is attempting to add a pixel too soon after the last one, `429 Too Many Requests` is returned.
 
-**Note:** The FrontendManager is responsible for checking the timestamp and secret for the requst. The required request interval can be changed by changing the constant `time_gap` which is set to 3 seconds by default.
+---
+
+**POST** `/changePixelRate`
+
+This route is used to update the pixel rate.
+
+Request Data: JSON containing the keys `"new_rate"` and `"token"`.
+
+Response Status Codes: If everything is okay and the pixel_rate is updated, `200 OK` is returned. If the response has an invalid token (i.e. the PG isn't registered), `401 Unauthorized` is returned. If there are missing attributes in the json file `400 Missing attributes` is returned.
 
 ## Technical Details About Middleware
 
@@ -153,12 +161,13 @@ There are a number of configurable components to the middleware that should be s
 
 A summary of the environment variables is given below:
 
-* `MONGO_HOST` and `MONGO_PORT` specify the host and port, respectively, of the MongoDB instance.
-* `TEMP_DIR` specifies the location of a temporary directory the middleware can create, write to, and read files from. This is used to store the files sent by the `/timelapse` route.
-* `INITIAL_WIDTH` and `INITIAL_HEIGHT` specify the initial dimensions of the pixel board.
-* `INITIAL_PALETTE` specifies the initial palette used, as a comma separated list of hex color codes (*without* a precedeing `#`).
-    - For example, the following is the string corresponding to the initial 16 colors available in the 2022 version of Reddit's r/place: `ffffff,d4d7d9,898d90,000000,9c6926,ff99aa,b44ac0,811e9f,51e9f4,3690ea,2450a4,7eed56,00a368,ffd635,ffa800,ff4500`.
-* `PIXEL_RATE` specifies the number of milliseconds between pixel updates that are permitted for a specific PG.
+- `MONGO_HOST` and `MONGO_PORT` specify the host and port, respectively, of the MongoDB instance.
+- `TEMP_DIR` specifies the location of a temporary directory the middleware can create, write to, and read files from. This is used to store the files sent by the `/timelapse` route.
+- `INITIAL_WIDTH` and `INITIAL_HEIGHT` specify the initial dimensions of the pixel board.
+- `INITIAL_PALETTE` specifies the initial palette used, as a comma separated list of hex color codes (_without_ a precedeing `#`).
+  - For example, the following is the string corresponding to the initial 16 colors available in the 2022 version of Reddit's r/place: `ffffff,d4d7d9,898d90,000000,9c6926,ff99aa,b44ac0,811e9f,51e9f4,3690ea,2450a4,7eed56,00a368,ffd635,ffa800,ff4500`.
+- `PIXEL_RATE` specifies the number of milliseconds between pixel updates that are permitted for a specific PG.
+- `CHANGE_PIXEL_RATE_TOKEN` specifies the secret token for updating pixel rate, should be private to administrator.
 
 ### Secrets
 
