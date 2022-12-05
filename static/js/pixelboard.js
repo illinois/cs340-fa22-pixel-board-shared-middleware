@@ -5,7 +5,7 @@ var _middlewareID = undefined;
 var _enableToken = undefined;
 var _colorChoice = undefined;
 var _previousChoice = undefined;
-
+var _alert_placeholder = undefined;
 // Fetch the settings:
 fetch("/settings")
 .then((response) => response.json())
@@ -22,9 +22,9 @@ let initBoard = function() {
   _canvas.id = "canvas"
   _canvas.getContext("2d").scale(3, 3);
 
+  _alert_placeholder = document.getElementById('alert_placeholder')
   initalizeSecret();
   initalizeSelector();
-
   document.getElementById("pixelboard").appendChild(_canvas);
 
   // Load the current board edits onto this instance of the canvas:
@@ -88,39 +88,82 @@ let initalizeSelector = function() {
 
 let initalizeSecret = function() {
   _enableToken = document.getElementById("enable")
-  _enableToken.addEventListener('click', function(event) {
-    let secret = document.getElementById("secretTextBox").value;
 
-    fetch("/register-pg", {
-      method: "PUT",
-      body: JSON.stringify({
-        "name": "Frontend",
-        "author": "N/A",
-        "secret": secret
-      }),
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then((response) => response.json())
-    .then((json) => _middlewareID = json["id"])
-    .catch((err) => console.log(err));
-  });
+  _enableToken.addEventListener('click', enableTokenListener);
 
-  _canvas.addEventListener('click', function(event) {
-    if(_middlewareID === undefined || _colorChoice === undefined) {
-      return;
+  _canvas.addEventListener('click', canvasListner, false);
+}
+
+let canvasListner = function(event) {
+  if(_middlewareID === undefined) {
+    alert("Press the button to begin.", "danger")
+    return;
+  }
+  if(_colorChoice === undefined) {
+    alert("Please choose a color :)", "danger")
+    return;
+  }
+  var elem = document.getElementById('canvas'),
+  elemLeft = elem.offsetLeft + elem.clientLeft,
+  elemTop = elem.offsetTop + elem.clientTop,
+  col = parseInt((event.pageX - elemLeft) / 3),
+  row = parseInt((event.pageY - elemTop) / 3);
+  fetch(`/changeByClick`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ "id": _middlewareID, "row": row, "col": col, "color": _colorChoice})
+  })
+  .then((response) => {
+    if(response.status === 429) {
+      alert("Too many requests!", "danger")
     }
-    var elem = document.getElementById('canvas'),
-    elemLeft = elem.offsetLeft + elem.clientLeft,
-    elemTop = elem.offsetTop + elem.clientTop,
-    col = parseInt((event.pageX - elemLeft) / 3),
-    row = parseInt((event.pageY - elemTop) / 3);
-    fetch(`/changeByClick`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ "id": _middlewareID, "row": row, "col": col, "color": _colorChoice})
-    })
-  }, false);
+  })
+  .catch((err) => console.log(err));
+};
+
+let enableTokenListener = function(event) {
+  let secret = document.getElementById("secretTextBox").value;
+  fetch("/register-pg", {
+    method: "PUT",
+    body: JSON.stringify({
+      "name": "Frontend",
+      "author": "N/A",
+      "secret": secret
+    }),
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then((response) => {
+    if(response.status != "200") {
+      alert("Invalid secret!", "danger")
+    } else {
+      document.getElementById("secretTextBox").disabled = true
+      _enableToken = document.getElementById("enable")
+      _enableToken.className = "btn btn-success"
+      _enableToken.value = "Activated"
+      _enableToken.removeEventListener("click", enableTokenListener)
+      return response.json()
+    }
+  })
+  .then((json) => _middlewareID = json["id"])
+  .catch((err) => console.log(err));
+}
+
+// Trigger alert
+const alert = (message, type) => {
+  const wrapper = document.createElement('div')
+  wrapper.innerHTML = [
+    `<div class="alert alert-${type} alert-dismissible fade show" role="alert">`,
+    `   <div>${message}</div>`,
+    '   <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close" ></button>',
+    '</div>'
+  ].join('')
+  _alert_placeholder.append(wrapper)
+
+  // Auto disappear in 1.2 seoncds
+  $(".alert").delay(1200).slideUp(200, function() {
+    $(this).alert('close');
+  });
 }

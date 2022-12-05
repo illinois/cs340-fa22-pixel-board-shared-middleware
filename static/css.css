@@ -92,14 +92,21 @@ nav a {
 }
 
 #selector {
-  display: flex; 
+  display: inline-flex; 
   flex-direction: row; 
   justify-content: left; 
   margin: 0px auto; 
   gap: 4px; 
   flex-wrap: wrap; 
   position: relative; 
+  width: 320px;
+}
+
+#alert_placeholder {
+  margin: 0px auto; 
+  gap: 4px; 
+  flex-wrap: wrap; 
+  position: relative; 
   align-items: center;
-  width: auto;
   width: 320px;
 }

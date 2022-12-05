@@ -18,19 +18,24 @@ if getenv("INITIAL_PALETTE"):
     INITIAL_PALETTE = ["#" + x for x in getenv("INITIAL_PALETTE").split(",")]
 else:
     INITIAL_PALETTE = random.choice([
-        ["#a7f542", "#7EA7DF", "#f3bcf5", "#6F6E69", "#F8F075", "#9ff5ec", "#E5E5E5"],
-        ["#B3E2E2", "#7EA7DF", "#F0A099", "#6F6E69", "#F8F075", "#FFFFFF", "#E5E5E5"],
+        ["#a7f542", "#7EA7DF", "#f3bcf5", "#6F6E69",
+            "#F8F075", "#9ff5ec", "#E5E5E5"],
+        ["#B3E2E2", "#7EA7DF", "#F0A099", "#6F6E69",
+            "#F8F075", "#FFFFFF", "#E5E5E5"],
         ["#000000", "#FFFFFF", "#FF0000", "#00FF00", "#0000FF"],
-        ["#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FF69B4", "#FFFF00", "#FFA500", "#FFC0CB",  "#800080", "#000000", "#808080", "#FF00FF", "#00FFFF", "#40E0D0", "#ADD8E6", "#90EE90", "#FFB6C1", "#FFFFE0", "#D3D3D3", "#AA7A6F", "#BA648C", "#164F82"],
+        ["#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FF69B4", "#FFFF00", "#FFA500", "#FFC0CB",  "#800080", "#000000", "#808080",
+            "#FF00FF", "#00FFFF", "#40E0D0", "#ADD8E6", "#90EE90", "#FFB6C1", "#FFFFE0", "#D3D3D3", "#AA7A6F", "#BA648C", "#164F82"],
 
         # Reddit r/place in 2022:
-        ["#ffffff" ,"#d4d7d9" ,"#898d90" ,"#000000", "#9c6926", "#ff99aa" ,"#b44ac0", "#811e9f", "#51e9f4" , "#3690ea" ,"#2450a4", "#7eed56", "#00a368", "#ffd635", "#ffa800", "#ff4500"],
+        ["#ffffff", "#d4d7d9", "#898d90", "#000000", "#9c6926", "#ff99aa", "#b44ac0", "#811e9f",
+            "#51e9f4", "#3690ea", "#2450a4", "#7eed56", "#00a368", "#ffd635", "#ffa800", "#ff4500"],
     ])
 
 TEMP_DIR = getenv("TEMP_DIR") or "tmp"
 makedirs(TEMP_DIR, exist_ok=True)
 
 PIXEL_RATE = int(getenv("PIXEL_RATE") or random.randint(100, 1000))
+
 
 class BoardManager:
     def __init__(self, db: Database):
@@ -68,7 +73,8 @@ class BoardManager:
 
         # Apply pixel updates
         for update in updates:
-            self.cache["pixels"][update["row"]][update["col"]] = update["color"]
+            self.cache["pixels"][update["row"]
+                                 ][update["col"]] = update["color"]
 
         # Update board in database
         self.board.update_one(
@@ -84,7 +90,6 @@ class BoardManager:
         for update in updates:
             update["time"] = now
         self.updates.insert_many(updates)
-
 
     def update_current_board(self, row, col, color):
         return self.update_current_board_by_list([{"row": row, "col": col, "color": color}])
@@ -127,13 +132,15 @@ class BoardManager:
         # Get the list of updates from the database
         updates = self.updates.find({}).sort("time")
         for update in updates:
-            pixels[update["row"], update["col"]] = self.__get_rgb_color(update["color"])
+            pixels[update["row"], update["col"]
+                   ] = self.__get_rgb_color(update["color"])
             frame = Image.fromarray(pixels)
             frames.append(frame)
 
         # Now create the GIF and save it to a temp file, returning the path
         temp_path = path.join(TEMP_DIR, "timelapse.gif")
-        im.save(temp_path, save_all=True, append_images=frames, duration=10, loop=0)
+        im.save(temp_path, save_all=True,
+                append_images=frames, duration=10, loop=0)
         return temp_path
 
     def __get_rgb_color(self, index):
@@ -142,3 +149,7 @@ class BoardManager:
         g = int(hex_color[3:5], 16)
         b = int(hex_color[5:7], 16)
         return (r, g, b)
+
+    def change_pixel_rate(new_rate: int):
+        global PIXEL_RATE
+        PIXEL_RATE = new_rate
