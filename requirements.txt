@@ -7,3 +7,4 @@ pymongo
 python-dotenv
 requests
 numpy
+Pillow
