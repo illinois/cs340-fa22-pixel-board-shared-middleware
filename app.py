@@ -145,8 +145,7 @@ def GET_settings():
     return jsonify({
         "width": board["width"],
         "height": board["height"],
-        "palette": board["palette"],
-        "pixel_rate": board_manager.get_pixel_rate()
+        "palette": board["palette"]
     })
 
 
