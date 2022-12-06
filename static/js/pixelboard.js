@@ -175,7 +175,7 @@ let enableFrontend = function(event) {
   })
   .then((json) => {
     _middlewareID = json["id"];
-    console.log(`Frontend Enabled (Id=${_middlewareID})`)
+    console.log(`Frontend Enabled (Secret=${secret} => Id=${_middlewareID})`)
 
     // Remove "Enable" button:
     document.getElementById("enableFrontendEditButton").remove();

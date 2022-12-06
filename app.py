@@ -70,11 +70,8 @@ def PUT_register_pg():
         return resp
 
     # Add the server and return the id
-    id = server_manager.add_server(
-        request.json["name"], request.json["author"])
-    return jsonify({
-        "id": id
-    })
+    id = server_manager.add_server(request.json["name"], request.json["author"], request.json["secret"])
+    return jsonify({"id": id})
 
 
 @app.route('/remove-pg', methods=['DELETE'])
@@ -114,7 +111,8 @@ def PUT_update_pixel():
         resp = make_response(jsonify({
             "success": False,
             "error": "429 Too Many Requests",
-            "rate": board_manager.get_pixel_rate()
+            "rate": board_manager.get_pixel_rate(),
+            "timeoutRemaining": server_timeout,
         }))
         resp.headers["Retry-After"] = server_timeout
         resp.status_code = 429

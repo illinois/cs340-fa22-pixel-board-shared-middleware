@@ -26,9 +26,9 @@ class ServerManager:
         else:
             return "id not found"
 
-    def add_server(self, name, author):
+    def add_server(self, name, author, secret):
         # Check if server is already there (same name and author)
-        found = self.collection.find_one({"name": name, "author": author})
+        found = self.collection.find_one({"secret": secret})
 
         # If it is, we just return the ID for that one; no need to create a new database entry
         if found:
@@ -38,6 +38,7 @@ class ServerManager:
         pg = {
             "name": name,
             "author": author,
+            "secret": secret,
             "timeout_time": datetime.utcnow()  # Ensures the PG can immediately write
         }
 
