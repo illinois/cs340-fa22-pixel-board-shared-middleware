@@ -76,7 +76,6 @@ class BoardManager:
             self.cache["pixels"][update["row"]][update["col"]] = update["color"]
             self.cache["lastModify"][update["row"]][update["col"]] = update["author"]
 
-
         # Update board in database
         self.board.update_one(
             {"current": True}, {"$set": {"pixels": self.cache["pixels"],"lastModify":self.cache["lastModify"]}}
@@ -91,7 +90,6 @@ class BoardManager:
         for update in updates:
             update["time"] = now
         self.updates.insert_many(updates)
-
 
     def update_current_board(self, row, col, color, author):
         return self.update_current_board_by_list([{"row": row, "col": col, "color": color, "author": author}])
