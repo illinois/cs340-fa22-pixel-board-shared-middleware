@@ -58,7 +58,7 @@ def PUT_register_pg():
             resp.status_code = 400
             print(resp)
             return resp
-    
+
     # Ensure that secret is in the list of secrets
     if secrets and request.json["secret"] not in secrets:
         resp = make_response(jsonify({
@@ -109,7 +109,7 @@ def PUT_update_pixel():
         resp.status_code = 401
         return resp
 
-    # If the server isn't, we reject the update
+    # If the server is still in cooldown, we reject the update
     elif server_timeout != 0:
         resp = make_response(jsonify({
             "success": False,
@@ -134,7 +134,8 @@ def PUT_update_pixel():
     })
 
     return jsonify({
-        "success": True
+        "success": True,
+        "rate": board_manager.get_pixel_rate()
     }), 200
 
 
@@ -183,10 +184,6 @@ def getPixelAuthor(col,row):
         "color": color
     }), 200
 
-@app.route('/changeByClick', methods=['POST'])
-def changeByClick():
-    return PUT_update_pixel()
-
 @app.route('/servers', methods=['GET'])
 def GET_servers():
     # Route for render server page
@@ -194,6 +191,27 @@ def GET_servers():
     sort_servers = sorted(servers, key=lambda e: e['author'])
 
     return render_template('server.html', data={"servers": sort_servers})
+
+
+@app.route('/changePixelRate', methods=['POST'])
+def POST_change_pixel_rate():
+    # Check required field
+    for requiredField in ["new_rate", "token"]:
+        if requiredField not in request.json:
+            resp = make_response(jsonify({
+                "success": False,
+                "error": f"Required field `{requiredField}` not present.",
+            }))
+            resp.status_code = 400
+            print(resp)
+            return resp
+
+    # Check token
+    if getenv("CHANGE_PIXEL_RATE_TOKEN") == request.json['token']:
+        board_manager.change_pixel_rate(int(request.json['new_rate']))
+        return "Success", 200
+    else:
+        return "Unauthorized", 401
 
 
 if __name__ == '__main__':

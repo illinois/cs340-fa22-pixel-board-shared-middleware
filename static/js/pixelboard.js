@@ -3,8 +3,8 @@ var _canvas = undefined;
 var _sio = undefined;
 var _middlewareID = undefined;
 var _enableToken = undefined;
-var _colorChoice = undefined;
-var _previousChoice = undefined;
+var _colorChoice = 0;
+var _previousChoice = 0;
 
 // Fetch the settings:
 fetch("/settings")
@@ -21,9 +21,6 @@ let initBoard = function() {
   _canvas.width = _settings.width * 3;
   _canvas.id = "canvas"
   _canvas.getContext("2d").scale(3, 3);
-
-  initalizeSecret();
-  initalizeSelector();
 
   document.getElementById("pixelboard").appendChild(_canvas);
 
@@ -61,15 +58,14 @@ let initBoard = function() {
       ctx.fillRect(x, y, 1, 1);
     })
 
-    // hoover 
+    // Hover: 
     const canvas = document.getElementById('canvas')
     function getCursorPosition(canvas, event) {
       var elemLeft = canvas.offsetLeft + canvas.clientLeft;
       var elemTop = canvas.offsetTop + canvas.clientTop;
       x = parseInt((event.pageX - elemLeft) / 3);
       y = parseInt((event.pageY - elemTop) / 3);
-      console.log("x: " + x + " y: " + y)
-      return [x,y]
+      return [x, y];
     }
     canvas.addEventListener('mousemove', function(e) {
       e.preventDefault();
@@ -93,27 +89,32 @@ let initBoard = function() {
     })
     canvas.addEventListener('mouseout', (event) => {
       const hidden = document.getElementById('mouse_over');
-      function delay(time) {
-        return new Promise(resolve => setTimeout(resolve, time));
-      }
-      delay(1000).then(() => {hidden.style.visibility = 'hidden';});
+      hidden.style.visibility = 'hidden';
     });
   })
 };
 
-let initalizeSelector = function() {
+let initializeColorSelector = function() {
   // Initialize the color selector
-  var colorSelect = document.getElementById("selector")
+  var colorSelect = document.getElementById("colorSelector");
+
   for(var i = 0; i < _settings.palette.length; i++) {
     var option = document.createElement("div")
     option.style.backgroundColor = _settings.palette[i]
     option.setAttribute('value', i)
     option.style.height = '20px'
     option.style.width = '42px'
+    option.style.marginLeft = '2px'
+    option.style.marginRight = '2px'
     option.style.display = 'inline-block'
+    if (i == _colorChoice) {
+      option.style.outline = "solid blue 3px";
+      _previousChoice = option;
+    }
+
     option.addEventListener('click', function(event) {
       if(_previousChoice !== undefined) {
-        _previousChoice.style.outline = ''
+        _previousChoice.style.outline = '';
       }
 
       _colorChoice = event.target.getAttribute("value")
@@ -122,43 +123,68 @@ let initalizeSelector = function() {
     })
     colorSelect.append(option)
   }
+
+  colorSelect.style.display = "inline-block";
 }
 
-let initalizeSecret = function() {
-  _enableToken = document.getElementById("enable")
-  _enableToken.addEventListener('click', function(event) {
-    let secret = document.getElementById("secretTextBox").value;
+let initializeSecret = function() {
+  _canvas.addEventListener('click', canvasListener, false);
+}
 
-    fetch("/register-pg", {
-      method: "PUT",
-      body: JSON.stringify({
-        "name": "Frontend",
-        "author": "N/A",
-        "secret": secret
-      }),
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then((response) => response.json())
-    .then((json) => _middlewareID = json["id"])
-    .catch((err) => console.log(err));
-  });
-
-  _canvas.addEventListener('click', function(event) {
-    if(_middlewareID === undefined || _colorChoice === undefined) {
-      return;
+let canvasListener = function(event) {
+  var elem = document.getElementById('canvas'),
+  elemLeft = elem.offsetLeft + elem.clientLeft,
+  elemTop = elem.offsetTop + elem.clientTop,
+  col = parseInt((event.pageX - elemLeft) / 3),
+  row = parseInt((event.pageY - elemTop) / 3);
+  fetch(`/update-pixel`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ "id": _middlewareID, "row": row, "col": col, "color": _colorChoice})
+  })
+  .then((response) => {
+    if(response.status === 429) {
+      alert("Too many requests!", "danger")
     }
-    var elem = document.getElementById('canvas'),
-    elemLeft = elem.offsetLeft + elem.clientLeft,
-    elemTop = elem.offsetTop + elem.clientTop,
-    col = parseInt((event.pageX - elemLeft) / 3),
-    row = parseInt((event.pageY - elemTop) / 3);
-    fetch(`/changeByClick`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ "id": _middlewareID, "row": row, "col": col, "color": _colorChoice})
-    })
-  }, false);
+  })
+  .catch((err) => console.log(err));
+};
+
+let enableFrontend = function(event) {
+  let secret = document.getElementById("pg_secret").value;
+  fetch("/register-pg", {
+    method: "PUT",
+    body: JSON.stringify({
+      "name": "Frontend",
+      "author": "N/A",
+      "secret": secret
+    }),
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then((response) => {
+    if(response.status != "200") {
+      document.getElementById("enableFrontendEditModal_error").innerHTML = `
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <div>Invalid Secret</div>
+          <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close" ></button>
+        </div>
+      `;
+    } else {
+      return response.json();
+    }
+  })
+  .then((json) => {
+    _middlewareID = json["id"];
+    console.log(`Frontend Enabled (Id=${_middlewareID})`)
+
+    // Remove "Enable" button:
+    document.getElementById("enableFrontendEditButton").remove();
+    initializeColorSelector();
+    initializeSecret();
+    
+    // Close Modal:
+    let modal = document.getElementById("enableFrontendEditModal");
+    bootstrap.Modal.getInstance(modal).hide();
+  })
+  .catch((err) => console.log(err));
 }
