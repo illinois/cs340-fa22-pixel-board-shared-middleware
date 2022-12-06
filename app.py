@@ -80,22 +80,31 @@ def DELETE_remove_pg():
     return jsonify({"success": True}), 200
 
 
-@app.route('/update-pixel', methods=['PUT'])
-def PUT_update_pixel():
-    # Get pixel update
-    update = request.json
+
+VALIDATE_PG_REQUEST_FOR_PIXEL_UPDATE = 1
+VALIDATE_PG_REQUEST_FOR_BOARD = 2
+
+def validate_PG_request(requestFor, requestJSON):
+    if requestFor == VALIDATE_PG_REQUEST_FOR_PIXEL_UPDATE:
+        requiredFields = ["row", "col", "color", "id"]
+    else:
+        requiredFields = ["id"]
+
     # Check if all required fields are present
-    for requiredField in ["row", "col", "color", "id"]:
-        if requiredField not in update:
+    for requiredField in requiredFields:
+        if requiredField not in requestJSON:
             resp = make_response(jsonify({
                 "success": False,
                 "error": f"Required field `{requiredField}` not present.",
             }))
             resp.status_code = 400
             return resp
-
+    
     # Check if the server is available to use
-    server_timeout = server_manager.use_server(update["id"])
+    if requestFor == VALIDATE_PG_REQUEST_FOR_PIXEL_UPDATE:
+        server_timeout = server_manager.use_server(requestJSON["id"])
+    else:
+        server_timeout = server_manager.use_server(requestJSON["id"], updateTimeout=False)
 
     # If the server isn't found, we reject the update
     if server_timeout < 0:
@@ -117,6 +126,20 @@ def PUT_update_pixel():
         resp.headers["Retry-After"] = server_timeout
         resp.status_code = 429
         return resp
+
+    return None
+
+
+
+@app.route('/update-pixel', methods=['PUT'])
+def PUT_update_pixel():
+    # Get pixel update
+    update = request.json
+
+    # Validate the PG is valid and can update the pixel:
+    validationFailure = validate_PG_request(VALIDATE_PG_REQUEST_FOR_PIXEL_UPDATE, update)
+    if validationFailure:
+        return validationFailure
 
     # Otherwise, we apply to the board, emit the update to frontend users, and let the user know of its success
     row = update["row"]
@@ -149,19 +172,32 @@ def GET_settings():
     })
 
 
-@app.route('/pixels', methods=['GET'])
-def GET_pixels():
+def return_board():
     # Get the current board and return just the pixels
     board = board_manager.get_current_board()
+
     # Check if the client has this cached
     if request.if_none_match.contains(board["hash"]):
         return "", 304
-    resp = make_response(jsonify({
-        "pixels": board["pixels"]
-    }))
-    # Add the etag
+    resp = make_response(jsonify({ "pixels": board["pixels"] }))
+
+    # Add the ETag
     resp.headers["ETag"] = board["hash"]
     return resp
+
+
+@app.route('/pixels', methods=['GET'])
+def GET_pixels():
+    # Validate the PG is valid and can update the pixel:
+    validationFailure = validate_PG_request(VALIDATE_PG_REQUEST_FOR_BOARD, request.json)
+    if validationFailure:
+        return validationFailure
+
+    return return_board()
+
+@app.route('/frontend-pixels', methods=['GET'])
+def GET_frontend_pixels():
+    return return_board()
 
 
 @app.route('/timelapse', methods=['GET'])

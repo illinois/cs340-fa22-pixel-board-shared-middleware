@@ -57,7 +57,7 @@ class ServerManager:
         # Delete the server in the database
         self.collection.delete_one({"_id": ObjectId(id)})
 
-    def use_server(self, id):
+    def use_server(self, id, updateTimeout=True):
         obj_id = ObjectId(id)
 
         # Get the server from the cache
@@ -77,16 +77,18 @@ class ServerManager:
         if found["timeout_time"] > now:
             return (found["timeout_time"] - now).total_seconds()
 
-        # Update the timeout_time and return 0 (no time needed)
-        # In cache
-        next_time = now + \
-            timedelta(milliseconds=self.board_manager.get_pixel_rate())
-        found["timeout_time"] = next_time
-        # In DB
-        self.collection.update_one(
-            {"_id": ObjectId(id)},
-            {"$set": {"timeout_time": next_time}}
-        )
+        # Update the timeout_time when requested
+        if updateTimeout:
+            # In cache
+            next_time = now + timedelta(milliseconds=self.board_manager.get_pixel_rate())
+            found["timeout_time"] = next_time
+            # In DB
+            self.collection.update_one(
+                {"_id": ObjectId(id)},
+                {"$set": {"timeout_time": next_time}}
+            )
+
+        # Return valid time for update (0ms)
         return 0
 
     def get_servers(self):
