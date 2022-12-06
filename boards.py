@@ -99,7 +99,7 @@ class BoardManager:
             "height": height,
             "palette": palette,
             "pixels": [[0 for _ in range(width)] for _ in range(height)],
-            "lastModify": [['no author' for _ in range(width)] for _ in range(height)]
+            "lastModify": [["" for _ in range(width)] for _ in range(height)]
         }
         # Hash the empty board
         self.update_hash(palette, board["pixels"])

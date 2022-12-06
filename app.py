@@ -150,8 +150,11 @@ def GET_timelapse():
 def getPixelAuthor(col,row):
     board = board_manager.get_current_board()
     author = board["lastModify"][int(row)][int(col)]
-    tmp = {"PixelAuthor": author}
-    return jsonify(tmp), 200
+    color = board["pixels"][int(row)][int(col)]
+    return jsonify({
+        "author": author,
+        "color": color
+    }), 200
 
 if __name__ == '__main__':
     sio.run(app, getenv("HOST") or "127.0.0.1", getenv("PORT") or 5000, debug=True)
