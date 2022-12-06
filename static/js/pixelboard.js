@@ -3,9 +3,9 @@ var _canvas = undefined;
 var _sio = undefined;
 var _middlewareID = undefined;
 var _enableToken = undefined;
-var _colorChoice = undefined;
-var _previousChoice = undefined;
-var _alert_placeholder = undefined;
+var _colorChoice = 0;
+var _previousChoice = 0;
+
 // Fetch the settings:
 fetch("/settings")
 .then((response) => response.json())
@@ -22,9 +22,6 @@ let initBoard = function() {
   _canvas.id = "canvas"
   _canvas.getContext("2d").scale(3, 3);
 
-  _alert_placeholder = document.getElementById('alert_placeholder')
-  initalizeSecret();
-  initalizeSelector();
   document.getElementById("pixelboard").appendChild(_canvas);
 
   // Load the current board edits onto this instance of the canvas:
@@ -61,15 +58,14 @@ let initBoard = function() {
       ctx.fillRect(x, y, 1, 1);
     })
 
-    // hoover 
+    // Hover: 
     const canvas = document.getElementById('canvas')
     function getCursorPosition(canvas, event) {
       var elemLeft = canvas.offsetLeft + canvas.clientLeft;
       var elemTop = canvas.offsetTop + canvas.clientTop;
       x = parseInt((event.pageX - elemLeft) / 3);
       y = parseInt((event.pageY - elemTop) / 3);
-      console.log("x: " + x + " y: " + y)
-      return [x,y]
+      return [x, y];
     }
     canvas.addEventListener('mousemove', function(e) {
       e.preventDefault();
@@ -93,27 +89,32 @@ let initBoard = function() {
     })
     canvas.addEventListener('mouseout', (event) => {
       const hidden = document.getElementById('mouse_over');
-      function delay(time) {
-        return new Promise(resolve => setTimeout(resolve, time));
-      }
-      delay(1000).then(() => {hidden.style.visibility = 'hidden';});
+      hidden.style.visibility = 'hidden';
     });
   })
 };
 
-let initalizeSelector = function() {
+let initializeColorSelector = function() {
   // Initialize the color selector
-  var colorSelect = document.getElementById("selector")
+  var colorSelect = document.getElementById("colorSelector");
+
   for(var i = 0; i < _settings.palette.length; i++) {
     var option = document.createElement("div")
     option.style.backgroundColor = _settings.palette[i]
     option.setAttribute('value', i)
     option.style.height = '20px'
     option.style.width = '42px'
+    option.style.marginLeft = '2px'
+    option.style.marginRight = '2px'
     option.style.display = 'inline-block'
+    if (i == _colorChoice) {
+      option.style.outline = "solid blue 3px";
+      _previousChoice = option;
+    }
+
     option.addEventListener('click', function(event) {
       if(_previousChoice !== undefined) {
-        _previousChoice.style.outline = ''
+        _previousChoice.style.outline = '';
       }
 
       _colorChoice = event.target.getAttribute("value")
@@ -122,36 +123,23 @@ let initalizeSelector = function() {
     })
     colorSelect.append(option)
   }
+
+  colorSelect.style.display = "inline-block";
 }
 
-let initalizeSecret = function() {
-  _enableToken = document.getElementById("enable")
-
-  _enableToken.addEventListener('click', enableTokenListener);
-
-  _canvas.addEventListener('click', canvasListner, false);
+let initializeSecret = function() {
+  _canvas.addEventListener('click', canvasListener, false);
 }
 
-let canvasListner = function(event) {
-  if(_middlewareID === undefined) {
-    alert("Press the button to begin.", "danger")
-    return;
-  }
-  if(_colorChoice === undefined) {
-    alert("Please choose a color :)", "danger")
-    return;
-  }
+let canvasListener = function(event) {
   var elem = document.getElementById('canvas'),
   elemLeft = elem.offsetLeft + elem.clientLeft,
   elemTop = elem.offsetTop + elem.clientTop,
   col = parseInt((event.pageX - elemLeft) / 3),
   row = parseInt((event.pageY - elemTop) / 3);
-  fetch(`/changeByClick`, {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
+  fetch(`/update-pixel`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ "id": _middlewareID, "row": row, "col": col, "color": _colorChoice})
   })
   .then((response) => {
@@ -162,8 +150,8 @@ let canvasListner = function(event) {
   .catch((err) => console.log(err));
 };
 
-let enableTokenListener = function(event) {
-  let secret = document.getElementById("secretTextBox").value;
+let enableFrontend = function(event) {
+  let secret = document.getElementById("pg_secret").value;
   fetch("/register-pg", {
     method: "PUT",
     body: JSON.stringify({
@@ -175,33 +163,28 @@ let enableTokenListener = function(event) {
   })
   .then((response) => {
     if(response.status != "200") {
-      alert("Invalid secret!", "danger")
+      document.getElementById("enableFrontendEditModal_error").innerHTML = `
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <div>Invalid Secret</div>
+          <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close" ></button>
+        </div>
+      `;
     } else {
-      document.getElementById("secretTextBox").disabled = true
-      _enableToken = document.getElementById("enable")
-      _enableToken.className = "btn btn-success"
-      _enableToken.value = "Activated"
-      _enableToken.removeEventListener("click", enableTokenListener)
-      return response.json()
+      return response.json();
     }
   })
-  .then((json) => _middlewareID = json["id"])
+  .then((json) => {
+    _middlewareID = json["id"];
+    console.log(`Frontend Enabled (Id=${_middlewareID})`)
+
+    // Remove "Enable" button:
+    document.getElementById("enableFrontendEditButton").remove();
+    initializeColorSelector();
+    initializeSecret();
+    
+    // Close Modal:
+    let modal = document.getElementById("enableFrontendEditModal");
+    bootstrap.Modal.getInstance(modal).hide();
+  })
   .catch((err) => console.log(err));
-}
-
-// Trigger alert
-const alert = (message, type) => {
-  const wrapper = document.createElement('div')
-  wrapper.innerHTML = [
-    `<div class="alert alert-${type} alert-dismissible fade show" role="alert">`,
-    `   <div>${message}</div>`,
-    '   <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close" ></button>',
-    '</div>'
-  ].join('')
-  _alert_placeholder.append(wrapper)
-
-  // Auto disappear in 1.2 seoncds
-  $(".alert").delay(1200).slideUp(200, function() {
-    $(this).alert('close');
-  });
 }

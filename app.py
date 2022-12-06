@@ -184,11 +184,6 @@ def getPixelAuthor(col,row):
         "color": color
     }), 200
 
-@app.route('/changeByClick', methods=['POST'])
-def changeByClick():
-    return PUT_update_pixel()
-
-
 @app.route('/servers', methods=['GET'])
 def GET_servers():
     # Route for render server page
