@@ -16,6 +16,16 @@ class ServerManager:
         self.cache = list(self.collection.find({}))
         print(self.cache)
 
+    def get_author_by_id(self,id):
+        # helper function for frontend show last modification
+        if id == 'no author':
+            return 'no author'
+        found = self.collection.find_one(ObjectId(id))
+        if found:
+            return found["author"]
+        else:
+            return "id not found"
+
     def add_server(self, name, author):
         # Check if server is already there (same name and author)
         found = self.collection.find_one({"name": name, "author": author})

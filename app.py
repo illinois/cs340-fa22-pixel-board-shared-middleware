@@ -87,7 +87,6 @@ def DELETE_remove_pg():
 def PUT_update_pixel():
     # Get pixel update
     update = request.json
-
     # Check if all required fields are present
     for requiredField in ["row", "col", "color", "id"]:
         if requiredField not in update:
@@ -125,8 +124,9 @@ def PUT_update_pixel():
     row = update["row"]
     col = update["col"]
     color = update["color"]
-
-    board_manager.update_current_board(row, col, color)
+    id = update["id"]
+    author = server_manager.get_author_by_id(id)
+    board_manager.update_current_board(row, col, color, author)
     sio.emit('pixel update', {
         'row': row,
         'col': col,
@@ -174,6 +174,15 @@ def GET_timelapse():
     # Serve the file here
     return send_file(timelapse_path), 200
 
+@app.route('/getPixelAuthor/<col>/<row>', methods=['GET'])
+def getPixelAuthor(col,row):
+    board = board_manager.get_current_board()
+    author = board["lastModify"][int(row)][int(col)]
+    color = board["pixels"][int(row)][int(col)]
+    return jsonify({
+        "author": author,
+        "color": color
+    }), 200
 
 @app.route('/changeByClick', methods=['POST'])
 def changeByClick():

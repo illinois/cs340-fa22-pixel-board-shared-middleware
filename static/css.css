@@ -1,3 +1,14 @@
+#mouse_over {
+  background-color: rgba(200, 200, 200, 0.5);
+  border: solid 1px black;
+  padding: 1px 3px;
+}
+
+#mouse_over .small {
+  font-size: 80%;
+}
+
+
 body {
   background-color: #f8f8fb;
 }
