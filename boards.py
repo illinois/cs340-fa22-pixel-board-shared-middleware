@@ -6,7 +6,6 @@ import random
 from bson.objectid import ObjectId
 from pymongo.database import Database
 from dotenv import load_dotenv
-from PIL import Image
 import numpy as np
 
 # Load the environment variables, with default fallback values
@@ -121,6 +120,7 @@ class BoardManager:
         self.hash.update((palette_string + pixel_string).encode())
 
     def generate_gif(self):
+        from PIL import Image
         pixels = np.array(
             [[self.__get_rgb_color(0) for _ in range(INITIAL_WIDTH)]
              for _ in range(INITIAL_HEIGHT)],
