@@ -24,8 +24,10 @@ Note that, prior to sending pixel updates, PGs must "register" with the middlewa
 
 ## Launching the Shared Middleware
 
-The shared middleware requires `mongo` as a database server. Launch mongo, then the app:
+The shared middleware requires `mongo` as a database server and all requirements in `requirements.txt`.
 
+Install requirements, launch mongo, then the app:
+- `py -m pip install -r requirements.txt`
 - `docker run --rm -it -p 27017:27017 mongo`
 - Either of the following:
   - In HTTP mode: `py -m flask run` / `python3 -m flask run`
