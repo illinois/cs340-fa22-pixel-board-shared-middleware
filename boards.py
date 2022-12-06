@@ -73,12 +73,12 @@ class BoardManager:
 
         # Apply pixel updates
         for update in updates:
-            self.cache["pixels"][update["row"]
-                                 ][update["col"]] = update["color"]
+            self.cache["pixels"][update["row"]][update["col"]] = update["color"]
+            self.cache["lastModify"][update["row"]][update["col"]] = update["author"]
 
         # Update board in database
         self.board.update_one(
-            {"current": True}, {"$set": {"pixels": self.cache["pixels"]}}
+            {"current": True}, {"$set": {"pixels": self.cache["pixels"],"lastModify":self.cache["lastModify"]}}
         )
 
         # Update the board hash
@@ -91,8 +91,8 @@ class BoardManager:
             update["time"] = now
         self.updates.insert_many(updates)
 
-    def update_current_board(self, row, col, color):
-        return self.update_current_board_by_list([{"row": row, "col": col, "color": color}])
+    def update_current_board(self, row, col, color, author):
+        return self.update_current_board_by_list([{"row": row, "col": col, "color": color, "author": author}])
 
     def initialize_new_board(self, width, height, palette):
         # Create a blank board
@@ -102,6 +102,7 @@ class BoardManager:
             "height": height,
             "palette": palette,
             "pixels": [[0 for _ in range(width)] for _ in range(height)],
+            "lastModify": [["" for _ in range(width)] for _ in range(height)]
         }
         # Hash the empty board
         self.update_hash(palette, board["pixels"])
