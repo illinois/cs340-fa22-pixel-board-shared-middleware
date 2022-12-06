@@ -1,4 +1,6 @@
 from os import getenv
+import os
+import json
 
 from dotenv import load_dotenv
 from pymongo import MongoClient
@@ -19,14 +21,24 @@ db = mongo_client["project-pixel"]
 board_manager = BoardManager(db)
 server_manager = ServerManager(db, board_manager)
 
+# Gather secrets
+if os.path.exists("secrets.json"):
+    secrets_file = open("secrets.json")
+    secrets = set(json.load(secrets_file)["secrets"])
+    secrets_file.close()
+else:
+    secrets = None
+
 # Get app context
 app = Flask(__name__)
 app.config['SECRET_KEY'] = getenv("SECRET_KEY") or "This is not secret."
 
-# Create a SocketIO app for 
+# Create a SocketIO app for
 sio = SocketIO(app, cors_allowed_origins="*")
 
 # Serving Frontend
+
+
 @app.route('/', methods=['GET'])
 def GET_index():
     '''Route for "/" (frontend)'''
@@ -44,18 +56,32 @@ def PUT_register_pg():
                 "error": f"Required field `{requiredField}` not present.",
             }))
             resp.status_code = 400
+            print(resp)
             return resp
+    
+    # Ensure that secret is in the list of secrets
+    if secrets and request.json["secret"] not in secrets:
+        resp = make_response(jsonify({
+            "success": False,
+            "error": f"Secret was not in list of valid secrets!",
+        }))
+        resp.status_code = 400
+        print(resp)
+        return resp
 
     # Add the server and return the id
-    id = server_manager.add_server(request.json["name"], request.json["author"])
+    id = server_manager.add_server(
+        request.json["name"], request.json["author"])
     return jsonify({
         "id": id
     })
+
 
 @app.route('/remove-pg', methods=['DELETE'])
 def DELETE_remove_pg():
     server_manager.remove_server(request.json["id"])
     return jsonify({"success": True}), 200
+
 
 @app.route('/update-pixel', methods=['PUT'])
 def PUT_update_pixel():
@@ -132,12 +158,13 @@ def GET_pixels():
     # Check if the client has this cached
     if request.if_none_match.contains(board["hash"]):
         return "", 304
-    resp =  make_response(jsonify({
+    resp = make_response(jsonify({
         "pixels": board["pixels"]
     }))
     # Add the etag
     resp.headers["ETag"] = board["hash"]
     return resp
+
 
 @app.route('/timelapse', methods=['GET'])
 def GET_timelapse():
@@ -156,5 +183,19 @@ def getPixelAuthor(col,row):
         "color": color
     }), 200
 
+@app.route('/changeByClick', methods=['POST'])
+def changeByClick():
+    return PUT_update_pixel()
+
+@app.route('/servers', methods=['GET'])
+def GET_servers():
+    # Route for render server page
+    servers = server_manager.cache
+    sort_servers = sorted(servers, key=lambda e: e['author'])
+
+    return render_template('server.html', data={"servers": sort_servers})
+
+
 if __name__ == '__main__':
-    sio.run(app, getenv("HOST") or "127.0.0.1", getenv("PORT") or 5000, debug=True)
+    sio.run(app, getenv("HOST") or "127.0.0.1",
+            getenv("PORT") or 5000, debug=True)

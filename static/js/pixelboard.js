@@ -1,6 +1,10 @@
 var _settings = undefined;
 var _canvas = undefined;
 var _sio = undefined;
+var _middlewareID = undefined;
+var _enableToken = undefined;
+var _colorChoice = undefined;
+var _previousChoice = undefined;
 
 // Fetch the settings:
 fetch("/settings")
@@ -17,6 +21,9 @@ let initBoard = function() {
   _canvas.width = _settings.width * 3;
   _canvas.id = "canvas"
   _canvas.getContext("2d").scale(3, 3);
+
+  initalizeSecret();
+  initalizeSelector();
 
   document.getElementById("pixelboard").appendChild(_canvas);
 
@@ -94,3 +101,64 @@ let initBoard = function() {
   })
 };
 
+let initalizeSelector = function() {
+  // Initialize the color selector
+  var colorSelect = document.getElementById("selector")
+  for(var i = 0; i < _settings.palette.length; i++) {
+    var option = document.createElement("div")
+    option.style.backgroundColor = _settings.palette[i]
+    option.setAttribute('value', i)
+    option.style.height = '20px'
+    option.style.width = '42px'
+    option.style.display = 'inline-block'
+    option.addEventListener('click', function(event) {
+      if(_previousChoice !== undefined) {
+        _previousChoice.style.outline = ''
+      }
+
+      _colorChoice = event.target.getAttribute("value")
+      event.target.style.outline = "solid blue 3px";
+      _previousChoice = event.target;
+    })
+    colorSelect.append(option)
+  }
+}
+
+let initalizeSecret = function() {
+  _enableToken = document.getElementById("enable")
+  _enableToken.addEventListener('click', function(event) {
+    let secret = document.getElementById("secretTextBox").value;
+
+    fetch("/register-pg", {
+      method: "PUT",
+      body: JSON.stringify({
+        "name": "Frontend",
+        "author": "N/A",
+        "secret": secret
+      }),
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then((response) => response.json())
+    .then((json) => _middlewareID = json["id"])
+    .catch((err) => console.log(err));
+  });
+
+  _canvas.addEventListener('click', function(event) {
+    if(_middlewareID === undefined || _colorChoice === undefined) {
+      return;
+    }
+    var elem = document.getElementById('canvas'),
+    elemLeft = elem.offsetLeft + elem.clientLeft,
+    elemTop = elem.offsetTop + elem.clientTop,
+    col = parseInt((event.pageX - elemLeft) / 3),
+    row = parseInt((event.pageY - elemTop) / 3);
+    fetch(`/changeByClick`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ "id": _middlewareID, "row": row, "col": col, "color": _colorChoice})
+    })
+  }, false);
+}

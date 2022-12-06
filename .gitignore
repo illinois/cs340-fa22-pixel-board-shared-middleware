@@ -8,3 +8,6 @@ tmp/
 __pycache__/
 *.py[cod]
 *$py.class
+
+# secrets.json file containing secrets for PGs to register with
+secrets.json

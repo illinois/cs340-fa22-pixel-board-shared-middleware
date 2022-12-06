@@ -18,8 +18,8 @@ if getenv("INITIAL_PALETTE"):
     INITIAL_PALETTE = ["#" + x for x in getenv("INITIAL_PALETTE").split(",")]
 else:
     INITIAL_PALETTE = random.choice([
-        ["#a7f542", "#7EA7DF", "#f3bcf5", "#6F6E69", "F8F075", "#9ff5ec", "#E5E5E5"],
-        ["#B3E2E2", "#7EA7DF", "#F0A099", "#6F6E69", "F8F075", "#FFFFFF", "#E5E5E5"],
+        ["#a7f542", "#7EA7DF", "#f3bcf5", "#6F6E69", "#F8F075", "#9ff5ec", "#E5E5E5"],
+        ["#B3E2E2", "#7EA7DF", "#F0A099", "#6F6E69", "#F8F075", "#FFFFFF", "#E5E5E5"],
         ["#000000", "#FFFFFF", "#FF0000", "#00FF00", "#0000FF"],
         ["#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FF69B4", "#FFFF00", "#FFA500", "#FFC0CB",  "#800080", "#000000", "#808080", "#FF00FF", "#00FFFF", "#40E0D0", "#ADD8E6", "#90EE90", "#FFB6C1", "#FFFFE0", "#D3D3D3", "#AA7A6F", "#BA648C", "#164F82"],
 

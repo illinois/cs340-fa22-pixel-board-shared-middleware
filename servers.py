@@ -6,6 +6,7 @@ from pymongo.database import Database
 
 from boards import BoardManager
 
+
 class ServerManager:
     def __init__(self, db: Database, board_manager: BoardManager):
         self.board_manager = board_manager
@@ -13,6 +14,7 @@ class ServerManager:
         self.collection = db["servers"]
         # In-memory cache of servers to avoid DB calls
         self.cache = list(self.collection.find({}))
+        print(self.cache)
 
     def get_author_by_id(self,id):
         # helper function for frontend show last modification
@@ -76,7 +78,8 @@ class ServerManager:
 
         # Update the timeout_time and return 0 (no time needed)
         # In cache
-        next_time = now + timedelta(milliseconds=self.board_manager.get_pixel_rate())
+        next_time = now + \
+            timedelta(milliseconds=self.board_manager.get_pixel_rate())
         found["timeout_time"] = next_time
         # In DB
         self.collection.update_one(
@@ -84,3 +87,7 @@ class ServerManager:
             {"$set": {"timeout_time": next_time}}
         )
         return 0
+
+    def get_servers(self):
+
+        return self.cache
