@@ -5,6 +5,7 @@ var _middlewareID = undefined;
 var _enableToken = undefined;
 var _colorChoice = 0;
 var _previousChoice = 0;
+let _frontend_timeout = 0;
 
 // Fetch the settings:
 fetch("/settings")
@@ -131,7 +132,21 @@ let initializeSecret = function() {
   _canvas.addEventListener('click', canvasListener, false);
 }
 
+let updateFrontendTimeout = function() {
+  _frontend_timeout -= 100;
+  if (_frontend_timeout <= 0) {
+    document.getElementById("timeoutDisplay").style.display = "none";
+    _frontend_timeout = 0;
+  } else {
+    document.getElementById("timeoutDisplay").style.display = "block";
+    document.getElementById("timeoutDisplay").innerHTML = `${(_frontend_timeout / 1000).toFixed(1)}s Until Next Pixel...`;
+    setTimeout(updateFrontendTimeout, 100);
+  }
+};
+
 let canvasListener = function(event) {
+  document.getElementById("timeoutDisplay").style.display = "block";
+  document.getElementById("timeoutDisplay").innerHTML = `Sending Pixel...`;
   var elem = document.getElementById('canvas'),
   elemLeft = elem.offsetLeft + elem.clientLeft,
   elemTop = elem.offsetTop + elem.clientTop,
@@ -144,10 +159,20 @@ let canvasListener = function(event) {
   })
   .then((response) => {
     if(response.status === 429) {
-      alert("Too many requests!", "danger")
+      alert("Too many requests!", "danger");
+      document.getElementById("timeoutDisplay").style.display = "none";
+    } else {
+      return response.json();
     }
   })
-  .catch((err) => console.log(err));
+  .then((json) => {
+    _frontend_timeout = json["rate"] + 100;
+    updateFrontendTimeout();
+  })
+  .catch((err) => {
+    console.log(err)
+    document.getElementById("timeoutDisplay").style.display = "none";
+  });
 };
 
 let enableFrontend = function(event) {
