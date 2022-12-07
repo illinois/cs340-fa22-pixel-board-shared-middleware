@@ -139,6 +139,7 @@ def PUT_update_pixel():
     # Validate the PG is valid and can update the pixel:
     validationFailure = validate_PG_request(VALIDATE_PG_REQUEST_FOR_PIXEL_UPDATE, update)
     if validationFailure:
+        print(validationFailure)
         return validationFailure
 
     # Otherwise, we apply to the board, emit the update to frontend users, and let the user know of its success
@@ -147,13 +148,20 @@ def PUT_update_pixel():
     color = update["color"]
     id = update["id"]
     author = server_manager.get_author_by_id(id)
-    board_manager.update_current_board(row, col, color, author)
+    
+    stats = board_manager.update_current_board(row, col, color, author, server_manager, id)
+    
+    # Notify all socket connections of update:
     sio.emit('pixel update', {
         'row': row,
         'col': col,
-        'color': color
+        'color': color,
+        'pixels': stats["pixels"],
+        'unnecessaryPixels': stats["unnecessaryPixels"],
+        'author': author
     })
 
+    # Return success:
     return jsonify({
         "success": True,
         "rate": board_manager.get_pixel_rate()

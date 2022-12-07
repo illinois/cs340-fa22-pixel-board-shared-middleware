@@ -42,6 +42,9 @@ class BoardManager:
         self.updates = db["updates"]
         self.hash = hashlib.md5()
 
+        self.statsDB = db["stats"]
+        self.stats = self.statsDB.find_one({}) or {"pixels": 0, "unnecessaryPixels": 0}
+
         # If we don't have a board, create an empty one
         current_board = self.board.find_one({"current": True})
         if not current_board:
@@ -65,17 +68,21 @@ class BoardManager:
             return self.board.find_one({"current": True})
 
     # Updates = [{row: int, col: int, color: int}]
-    def update_current_board_by_list(self, updates, server):
+    def update_current_board_by_list(self, updates, serverManager, id):
         # Update cache if we need to
         if not self.cache:
             self.cache = self.board.find_one({"current": True})
 
         # Collect statistics:
         for update in updates:
+            self.stats["pixels"] = self.stats["pixels"] + 1
             if self.cache["pixels"][update["row"]][update["col"]] == update["color"]:
+                serverManager.update_pixel_count(id, necessaryPixel=False)
+                self.stats["unnecessaryPixels"] = self.stats["unnecessaryPixels"] + 1
+            else:
+                serverManager.update_pixel_count(id, necessaryPixel=True)
 
-
-
+            self.statsDB.update_one({}, {"$set": self.stats})
 
         # Apply pixel updates
         for update in updates:
@@ -96,9 +103,14 @@ class BoardManager:
         for update in updates:
             update["time"] = now
         self.updates.insert_many(updates)
+        return self.stats
 
-    def update_current_board(self, row, col, color, author):
-        return self.update_current_board_by_list([{"row": row, "col": col, "color": color, "author": author}])
+    def update_current_board(self, row, col, color, author, serverManager, id):
+        return self.update_current_board_by_list(
+            [{"row": row, "col": col, "color": color, "author": author}],
+            serverManager,
+            id
+        )
 
     def initialize_new_board(self, width, height, palette):
         # Create a blank board

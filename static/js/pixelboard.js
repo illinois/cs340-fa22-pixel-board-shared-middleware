@@ -18,8 +18,8 @@ fetch("/settings")
 // Initialize the canvas:
 let initBoard = function() {
   _canvas = document.createElement("canvas");
-  _canvas.height = _settings.height * 3;
-  _canvas.width = _settings.width * 3;
+  _canvas.height = (_settings.height - 1) * 3;
+  _canvas.width = (_settings.width - 1) * 3;
   _canvas.id = "canvas"
   _canvas.getContext("2d").scale(3, 3);
 
@@ -31,7 +31,6 @@ let initBoard = function() {
   .then((data) => {
     let ctx = _canvas.getContext("2d");
     let pixels = data.pixels;
-    console.log(pixels);
 
     for (let y = 0; y < pixels.length; y++) {
       for (let x = 0; x < pixels[y].length; x++) {
@@ -57,6 +56,8 @@ let initBoard = function() {
       let ctx = _canvas.getContext("2d");
       ctx.fillStyle = color;
       ctx.fillRect(x, y, 1, 1);
+
+      document.getElementById("statsDisplay").innerHTML = `${msg["pixels"]} pixels generated (${msg["unnecessaryPixels"]} unnecessary, ${(100 * msg["unnecessaryPixels"] / msg["pixels"]).toFixed(2)}%)`
     })
 
     // Hover: 
