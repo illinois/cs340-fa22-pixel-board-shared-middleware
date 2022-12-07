@@ -65,7 +65,7 @@ def PUT_register_pg():
             "success": False,
             "error": f"Secret was not in list of valid secrets!",
         }))
-        resp.status_code = 400
+        resp.status_code = 401
         print(resp)
         return resp
 
