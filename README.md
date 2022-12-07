@@ -75,7 +75,7 @@ This request is used by a PG to update a pixel on the board. They need to have r
 
 Request Data: JSON containing the following fields: `"id"` containing the token; `"row"` containing the row of the pixel to update; `"col"` containing the column of the pixel to update; and `"color"` containing the color to set that pixel to (as an index of the palette array).
 
-Response Status Codes: If everything is okay and the pixel is updated, `200 OK` is returned. If the response has an invalid token (i.e. the PG isn't registered), `401 Unauthorized` is returned. Finally, if the PG is attempting to add a pixel too soon after the last one, `429 Too Many Requests` is returned.
+Response Status Codes: If everything is okay and the pixel is updated, `200 OK` is returned as well as a `rate` indicating the number of milliseconds that must be waited until the next pixel update request. If the response has an invalid token (i.e. the PG isn't registered), `401 Unauthorized` is returned. Finally, if the PG is attempting to add a pixel too soon after the last one, `429 Too Many Requests` is returned.
 
 Response Headers: If and only if the `429 Too Many Requests` status code is returned, a `Retry-After` header is present to indicate, in seconds, how long the PG must wait to send another pixel.
 
@@ -91,13 +91,15 @@ This method is essentially the same as specified in the project requirements, bu
 
 Response Status Codes: If the request is successful, a `200 OK` is returned.
 
-Response Data: JSON containing the following keys: `"width"` and `"height"` specifying the dimensions of the pixel board; `"palette"` containing an array of hex-color codes (the indices of which are used in `/update-pixel` requests); and `"pixel_rate"` indicating the amount of time that must be waited between pixel update requests (in milliseconds).
+Response Data: JSON containing the following keys: `"width"` and `"height"` specifying the dimensions of the pixel board; and `"palette"` containing an array of hex-color codes (the indices of which are used in `/update-pixel` requests).
 
 ---
 
 **GET** `/pixels`
 
-This method is exactly as specified in the project requirements, but also supports ETag caching.
+This method is exactly as specified in the project requirements, but also supports ETag caching. A request to `/pixels` can only be made when a PG is able to update the pixel board.
+
+Request Data: An `id` that contains your ID token.
 
 Request Headers: Optionally, a `If-None-Match` header may be used to include an ETag. If the ETag matches the most recent data available, the client may use its cached copy.
 
@@ -141,7 +143,7 @@ This route is used to update the pixel rate.
 
 Request Data: JSON containing the keys `"new_rate"` and `"token"`.
 
-Response Status Codes: If everything is okay and the pixel_rate is updated, `200 OK` is returned. If the response has an invalid token (i.e. the PG isn't registered), `401 Unauthorized` is returned. If there are missing attributes in the json file `400 Missing attributes` is returned.
+Response Status Codes: If everything is okay and the pixel rate is updated, `200 OK` is returned. If the response has an invalid token (i.e. the PG isn't registered), `401 Unauthorized` is returned. If there are missing attributes in the json file `400 Missing attributes` is returned.
 
 ## Technical Details About Middleware
 
