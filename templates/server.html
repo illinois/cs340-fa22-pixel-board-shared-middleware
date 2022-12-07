@@ -61,17 +61,14 @@
         <th>Name</th>
         <th>Author</th>
         <th>Number of Pixels Generated</th>
+        <th>Unnecessary Pixel</th>
       </tr>
       {% for server in data.servers %}
       <tr {% if loop.index > 1 and loop.previtem["author"] != server["author"] %}style="border-top: solid 2px black"{% endif %}>
-        <td>
-          {{ server["name"] }}
-          <!--TODO: Enable single PG showcase -->
-          <!-- <a href="">{{ server["name"] }}</a> -->
-        </td>
+        <td>{{ server["name"] }}</td>
         <td>{{ server["author"] }}</td>
-        <!-- TODO: enable displaying number of pixels occupied, can be done with Issue4-->
-        <td>&mdash;</td>
+        <td>{{ server["pixels"] }}</td>
+        <td>{{ server["unnecessaryPixels"] }}</td>
       </tr>
       {% endfor %}
     </table>

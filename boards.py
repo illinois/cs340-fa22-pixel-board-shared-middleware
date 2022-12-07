@@ -65,10 +65,17 @@ class BoardManager:
             return self.board.find_one({"current": True})
 
     # Updates = [{row: int, col: int, color: int}]
-    def update_current_board_by_list(self, updates):
+    def update_current_board_by_list(self, updates, server):
         # Update cache if we need to
         if not self.cache:
             self.cache = self.board.find_one({"current": True})
+
+        # Collect statistics:
+        for update in updates:
+            if self.cache["pixels"][update["row"]][update["col"]] == update["color"]:
+
+
+
 
         # Apply pixel updates
         for update in updates:
