@@ -26,7 +26,7 @@ let initBoard = function() {
   document.getElementById("pixelboard").appendChild(_canvas);
 
   // Load the current board edits onto this instance of the canvas:
-  fetch("/pixels")
+  fetch("/frontend-pixels")
   .then((response) => response.json())
   .then((data) => {
     let ctx = _canvas.getContext("2d");
