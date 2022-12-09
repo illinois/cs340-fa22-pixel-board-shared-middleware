@@ -143,9 +143,9 @@ def PUT_update_pixel():
         return validationFailure
 
     # Otherwise, we apply to the board, emit the update to frontend users, and let the user know of its success
-    row = update["row"]
-    col = update["col"]
-    color = update["color"]
+    row = int(update["row"])
+    col = int(update["col"])
+    color = int(update["color"])
     id = update["id"]
     author = server_manager.get_author_by_id(id)
     
