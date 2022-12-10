@@ -22,10 +22,10 @@ board_manager = BoardManager(db)
 server_manager = ServerManager(db, board_manager)
 
 # Gather secrets
-if os.path.exists("secrets.json"):
-    secrets_file = open("secrets.json")
-    secrets = set(json.load(secrets_file)["secrets"])
-    secrets_file.close()
+if os.path.exists("secrets.txt"):
+    with open("secrets.txt") as f:
+        secrets = f.readlines()
+    secrets = set([secret.strip() for secret in secrets])
 else:
     secrets = None
 
