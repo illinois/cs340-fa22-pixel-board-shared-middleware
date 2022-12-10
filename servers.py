@@ -27,11 +27,15 @@ class ServerManager:
             return "id not found"
 
     def add_server(self, name, author, secret):
-        # Check if server is already there (same name and author)
+        # Check if server is already there (same secret)
         found = self.collection.find_one({"secret": secret})
 
         # If it is, we just return the ID for that one; no need to create a new database entry
         if found:
+            self.collection.update_one(
+                {"secret": secret},
+                {"$set": {"name": name, "author": author}}
+            )
             return str(found["_id"])
 
         # If not found, we create a new one and add it to the database
