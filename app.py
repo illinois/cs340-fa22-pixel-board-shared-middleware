@@ -149,20 +149,28 @@ def PUT_update_pixel():
     stats = board_manager.update_current_board(row, col, color, author, server_manager, id)
     
     # Notify all socket connections of update:
-    sio.emit('pixel update', {
-        'row': row,
-        'col': col,
-        'color': color,
-        'pixels': stats["pixels"],
-        'unnecessaryPixels': stats["unnecessaryPixels"],
-        'author': author
-    })
+    if stats:
+        sio.emit('pixel update', {
+            'row': row,
+            'col': col,
+            'color': color,
+            'pixels': stats["pixels"],
+            'unnecessaryPixels': stats["unnecessaryPixels"],
+            'author': author
+        })
 
-    # Return success:
-    return jsonify({
-        "success": True,
-        "rate": board_manager.get_pixel_rate()
-    }), 200
+        # Return success:
+        return jsonify({
+            "success": True,
+            "rate": board_manager.get_pixel_rate()
+        }), 200
+    else:
+        # Return success:
+        return jsonify({
+            "success": True,
+            "currentlyDisabled": True,
+            "rate": board_manager.get_pixel_rate()
+        }), 200
 
 
 @app.route('/settings', methods=['GET'])

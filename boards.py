@@ -76,37 +76,39 @@ class BoardManager:
         if not self.cache:
             self.cache = self.board.find_one({"current": True})
 
-        if not BOARD_DISABLED:
-            # Collect statistics:
-            for update in updates:
-                self.stats["pixels"] = self.stats["pixels"] + 1
-                if self.cache["pixels"][update["row"]][update["col"]] == update["color"]:
-                    serverManager.update_pixel_count(id, necessaryPixel=False)
-                    self.stats["unnecessaryPixels"] = self.stats["unnecessaryPixels"] + 1
-                else:
-                    serverManager.update_pixel_count(id, necessaryPixel=True)
+        if BOARD_DISABLED:
+            return None
 
-                self.statsDB.update_one({}, {"$set": self.stats})
+        # Collect statistics:
+        for update in updates:
+            self.stats["pixels"] = self.stats["pixels"] + 1
+            if self.cache["pixels"][update["row"]][update["col"]] == update["color"]:
+                serverManager.update_pixel_count(id, necessaryPixel=False)
+                self.stats["unnecessaryPixels"] = self.stats["unnecessaryPixels"] + 1
+            else:
+                serverManager.update_pixel_count(id, necessaryPixel=True)
 
-            # Apply pixel updates
-            for update in updates:
-                self.cache["pixels"][update["row"]][update["col"]] = update["color"]
-                self.cache["lastModify"][update["row"]][update["col"]] = update["author"]
+            self.statsDB.update_one({}, {"$set": self.stats})
 
-            # Update board in database
-            self.board.update_one(
-                {"current": True}, {"$set": {"pixels": self.cache["pixels"],"lastModify":self.cache["lastModify"]}}
-            )
+        # Apply pixel updates
+        for update in updates:
+            self.cache["pixels"][update["row"]][update["col"]] = update["color"]
+            self.cache["lastModify"][update["row"]][update["col"]] = update["author"]
 
-            # Update the board hash
-            self.update_hash(self.cache["palette"], self.cache["pixels"])
-            self.cache["hash"] = self.hash.hexdigest()
+        # Update board in database
+        self.board.update_one(
+            {"current": True}, {"$set": {"pixels": self.cache["pixels"],"lastModify":self.cache["lastModify"]}}
+        )
 
-            # Add board updates to database collection
-            now = datetime.utcnow()
-            for update in updates:
-                update["time"] = now
-            self.updates.insert_many(updates)
+        # Update the board hash
+        self.update_hash(self.cache["palette"], self.cache["pixels"])
+        self.cache["hash"] = self.hash.hexdigest()
+
+        # Add board updates to database collection
+        now = datetime.utcnow()
+        for update in updates:
+            update["time"] = now
+        self.updates.insert_many(updates)
 
         return self.stats
 
