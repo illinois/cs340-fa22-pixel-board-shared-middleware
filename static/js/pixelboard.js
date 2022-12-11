@@ -173,8 +173,12 @@ let canvasListener = function(event) {
     }
   })
   .then((json) => {
-    _frontend_timeout = json["rate"] + 100;
-    updateFrontendTimeout();
+    if (json["currentlyDisabled"]) {
+      document.getElementById("timeoutDisplay").innerHTML = `Your pixel was sent but this pixel board was disabled at the time you sent your pixel.`;
+    } else {
+      _frontend_timeout = json["rate"] + 100;
+      updateFrontendTimeout();
+    }
   })
   .catch((err) => {
     console.log(err);
