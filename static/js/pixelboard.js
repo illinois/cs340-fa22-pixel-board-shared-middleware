@@ -178,9 +178,10 @@ let canvasListener = function(event) {
       document.getElementById("disabledDisplay").style.display = "block";
     } else {
       document.getElementById("disabledDisplay").style.display = "none";
-      _frontend_timeout = json["rate"] + 100;
-      updateFrontendTimeout();
     }
+
+    _frontend_timeout = json["rate"] + 100;
+    updateFrontendTimeout();
   })
   .catch((err) => {
     console.log(err);
