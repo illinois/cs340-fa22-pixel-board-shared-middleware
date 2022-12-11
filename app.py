@@ -74,13 +74,6 @@ def PUT_register_pg():
     return jsonify({"id": id})
 
 
-@app.route('/remove-pg', methods=['DELETE'])
-def DELETE_remove_pg():
-    server_manager.remove_server(request.json["id"])
-    return jsonify({"success": True}), 200
-
-
-
 VALIDATE_PG_REQUEST_FOR_PIXEL_UPDATE = 1
 VALIDATE_PG_REQUEST_FOR_BOARD = 2
 
