@@ -61,11 +61,14 @@
 
 
   <script>
-  fetch("/settings")
-  .then((response) => response.json())
-  .then((json) => {
-    document.getElementById("settings_output").innerHTML = `<pre>${JSON.stringify(json, null, 2)}</pre>`;
-  })
+  function updateSettingsDisplay() {
+    fetch("/settings")
+    .then((response) => response.json())
+    .then((json) => {
+      document.getElementById("settings_output").innerHTML = `<pre>${JSON.stringify(json, null, 2)}</pre>`;
+    })
+  }
+  updateSettingsDisplay();
 
   function updateRoute(route) {
     fetch(route, {
@@ -79,6 +82,7 @@
     .then((response) => {
       if (response.status != "200") {
         alert(response.statusText);
+        updateSettingsDisplay();
       } else {
         return response.text();
       }
