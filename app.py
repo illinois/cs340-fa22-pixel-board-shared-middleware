@@ -184,6 +184,7 @@ def GET_settings():
         "palette": board["palette"],
         "enabled": board_manager.get_enabled_state(),
         "stats": board_manager.get_stats(),
+        "currentPixelRate": board_manager.get_pixel_rate(),
     })
 
 
