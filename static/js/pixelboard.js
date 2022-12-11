@@ -174,8 +174,10 @@ let canvasListener = function(event) {
   })
   .then((json) => {
     if (json["currentlyDisabled"]) {
-      document.getElementById("timeoutDisplay").innerHTML = `Your pixel was sent but this pixel board was disabled at the time you sent your pixel.`;
+      document.getElementById("disabledDisplay").innerHTML = `Your pixel was sent but this pixel board was disabled at the time you sent your pixel.`;
+      document.getElementById("disabledDisplay").style.display = "block";
     } else {
+      document.getElementById("disabledDisplay").style.display = "none";
       _frontend_timeout = json["rate"] + 100;
       updateFrontendTimeout();
     }
