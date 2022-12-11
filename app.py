@@ -147,7 +147,7 @@ def PUT_update_pixel():
     author = server_manager.get_author_by_id(id)
 
     # Validate a valid color index:
-    if color < 0 or color >= len(board_manager.get_palette):
+    if color < 0 or color >= len(board_manager.get_palette()):
         resp = make_response(jsonify({
             "success": False,
             "error": "Invalid Color",
