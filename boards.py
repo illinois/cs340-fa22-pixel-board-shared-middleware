@@ -35,6 +35,9 @@ makedirs(TEMP_DIR, exist_ok=True)
 
 PIXEL_RATE = int(getenv("PIXEL_RATE") or random.randint(100, 1000))
 
+BOARD_DISABLED = False
+if getenv("START_DISABLED"):
+    BOARD_DISABLED = True
 
 class BoardManager:
     def __init__(self, db: Database):
@@ -73,36 +76,38 @@ class BoardManager:
         if not self.cache:
             self.cache = self.board.find_one({"current": True})
 
-        # Collect statistics:
-        for update in updates:
-            self.stats["pixels"] = self.stats["pixels"] + 1
-            if self.cache["pixels"][update["row"]][update["col"]] == update["color"]:
-                serverManager.update_pixel_count(id, necessaryPixel=False)
-                self.stats["unnecessaryPixels"] = self.stats["unnecessaryPixels"] + 1
-            else:
-                serverManager.update_pixel_count(id, necessaryPixel=True)
+        if not BOARD_DISABLED:
+            # Collect statistics:
+            for update in updates:
+                self.stats["pixels"] = self.stats["pixels"] + 1
+                if self.cache["pixels"][update["row"]][update["col"]] == update["color"]:
+                    serverManager.update_pixel_count(id, necessaryPixel=False)
+                    self.stats["unnecessaryPixels"] = self.stats["unnecessaryPixels"] + 1
+                else:
+                    serverManager.update_pixel_count(id, necessaryPixel=True)
 
-            self.statsDB.update_one({}, {"$set": self.stats})
+                self.statsDB.update_one({}, {"$set": self.stats})
 
-        # Apply pixel updates
-        for update in updates:
-            self.cache["pixels"][update["row"]][update["col"]] = update["color"]
-            self.cache["lastModify"][update["row"]][update["col"]] = update["author"]
+            # Apply pixel updates
+            for update in updates:
+                self.cache["pixels"][update["row"]][update["col"]] = update["color"]
+                self.cache["lastModify"][update["row"]][update["col"]] = update["author"]
 
-        # Update board in database
-        self.board.update_one(
-            {"current": True}, {"$set": {"pixels": self.cache["pixels"],"lastModify":self.cache["lastModify"]}}
-        )
+            # Update board in database
+            self.board.update_one(
+                {"current": True}, {"$set": {"pixels": self.cache["pixels"],"lastModify":self.cache["lastModify"]}}
+            )
 
-        # Update the board hash
-        self.update_hash(self.cache["palette"], self.cache["pixels"])
-        self.cache["hash"] = self.hash.hexdigest()
+            # Update the board hash
+            self.update_hash(self.cache["palette"], self.cache["pixels"])
+            self.cache["hash"] = self.hash.hexdigest()
 
-        # Add board updates to database collection
-        now = datetime.utcnow()
-        for update in updates:
-            update["time"] = now
-        self.updates.insert_many(updates)
+            # Add board updates to database collection
+            now = datetime.utcnow()
+            for update in updates:
+                update["time"] = now
+            self.updates.insert_many(updates)
+            
         return self.stats
 
     def update_current_board(self, row, col, color, author, serverManager, id):
