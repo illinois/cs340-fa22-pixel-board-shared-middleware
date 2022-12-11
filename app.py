@@ -44,6 +44,10 @@ def GET_index():
     '''Route for "/" (frontend)'''
     return render_template("index.html")
 
+@app.route('/admin/', methods=['GET'])
+def GET_admin():
+    return render_template("admin.html")
+
 
 # Middleware Methods
 @app.route('/register-pg', methods=['PUT'])
@@ -169,7 +173,9 @@ def GET_settings():
     return jsonify({
         "width": board["width"],
         "height": board["height"],
-        "palette": board["palette"]
+        "palette": board["palette"],
+        "enabled": board_manager.get_enabled_state(),
+        "stats": board_manager.get_stats(),
     })
 
 
@@ -241,8 +247,18 @@ def POST_change_pixel_rate():
             return resp
 
     # Check token
-    if getenv("CHANGE_PIXEL_RATE_TOKEN") == request.json['token']:
+    if getenv("ADMIN_TOKEN") == request.json['token']:
         board_manager.change_pixel_rate(int(request.json['new_rate']))
+        return "Success", 200
+    else:
+        return "Unauthorized", 401
+
+
+@app.route('/enableBoard', methods=['POST'])
+def POST_enableBoard():
+    # Allow enable only with ADMIN_TOKEN
+    if getenv("ADMIN_TOKEN") and getenv("ADMIN_TOKEN") == request.json['token']:
+        board_manager.set_enabled_state(True)
         return "Success", 200
     else:
         return "Unauthorized", 401

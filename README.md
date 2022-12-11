@@ -28,8 +28,10 @@ The shared middleware requires `mongo` as a database server and all requirements
 
 Install requirements, launch mongo, then the app:
 - `py -m pip install -r requirements.txt`
-- `docker run --rm -it -p 27017:27017 mongo`
-- Either of the following:
+- One of the following:
+  - In console mode: `docker run --rm -it -p 27017:27017 mongo`
+  - In background mode: `docker run -d -p 27017:27017 mongo`
+- One of the following:
   - In HTTP mode: `py -m flask run` / `python3 -m flask run`
   - In WebSocket mode: `py app.py` / `python3 app.py`
 

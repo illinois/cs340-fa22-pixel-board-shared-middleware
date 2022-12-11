@@ -175,11 +175,12 @@ class BoardManager:
         b = int(hex_color[5:7], 16)
         return (r, g, b)
 
-    def change_pixel_rate(new_rate: int):
+    def change_pixel_rate(self, new_rate: int):
         global PIXEL_RATE
         PIXEL_RATE = new_rate
+        return PIXEL_RATE
 
-    def set_enabled_state(is_enabled):
+    def set_enabled_state(self, is_enabled):
         global BOARD_DISABLED
 
         if is_enabled:
@@ -187,5 +188,11 @@ class BoardManager:
         else:
             BOARD_DISABLED = True
 
-        return PIXEL_RATE
+        return BOARD_DISABLED
 
+    def get_enabled_state(self):
+        global BOARD_DISABLED
+        return not BOARD_DISABLED
+
+    def get_stats(self):
+        return self.stats

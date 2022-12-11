@@ -15,6 +15,12 @@ fetch("/settings")
   initBoard();
 })
 
+// Save secret:
+var _frontend_token = localStorage.getItem('frontend-token');
+if (_frontend_token) {
+  document.getElementById("pg_secret").value = _frontend_token;
+}
+
 // Initialize the canvas:
 let initBoard = function() {
   _canvas = document.createElement("canvas");
@@ -171,7 +177,7 @@ let canvasListener = function(event) {
     updateFrontendTimeout();
   })
   .catch((err) => {
-    console.log(err)
+    console.log(err);
     document.getElementById("timeoutDisplay").style.display = "none";
   });
 };
@@ -201,6 +207,7 @@ let enableFrontend = function(event) {
   })
   .then((json) => {
     _middlewareID = json["id"];
+    localStorage.setItem('frontend-token', secret);
     console.log(`Frontend Enabled (Secret=${secret} => Id=${_middlewareID})`)
 
     // Remove "Enable" button:

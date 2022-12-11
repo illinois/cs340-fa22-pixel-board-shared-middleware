@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CS 340 Pixel Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Archivo&family=Neuton&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<link href="/static/css.css" rel="stylesheet"/>
+ 
+</head>
+
+<body class="d-flex flex-column justify-content-between min-vh-100">  
+  <header class="py-1 mb-3">
+    <div class="container">
+      <nav class="navbar navbar-expand-md navbar-dark">
+        <a class="navbar-brand" href="/">
+          CS 340's Pixel Board
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse d-md-flex justify-content-md-end" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a href="/" class="nav-link link-light" aria-current=page>Home</a>
+            </li>
+            <li class="nav-item">
+              <a href="/servers" class="nav-link link-light" aria-current=page>Servers</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="content container flex-grow-1 mb-2">
+    <form>
+      <div class="mb-3">
+        <label for="admin_token" class="form-label">Admin Token:</label>
+        <input type="password" class="form-control" id="admin_token">
+      </div>
+
+      <div class="mb-3">
+        <label for="pixel_rate_update" class="form-label">New Pixel Rate:</label>
+        <input type="text" class="form-control" id="pixel_rate_update">
+        <button class="btn btn-primary" onclick="updateRoute('/changePixelRate'); return false;">Update Pixel Rate</button>
+      </div>
+
+      <div class="mb-3">
+        <button class="btn btn-primary" onclick="updateRoute('/enableBoard'); return false;">Enable Pixel Board</button>
+      </div>
+    </form>
+    <hr>
+    <div id="settings_output"></div>
+  </main>
+
+
+  <script>
+  fetch("/settings")
+  .then((response) => response.json())
+  .then((json) => {
+    document.getElementById("settings_output").innerHTML = `<pre>${JSON.stringify(json, null, 2)}</pre>`;
+  })
+
+  function updateRoute(route) {
+    fetch(route, {
+      method: "POST",
+      body: JSON.stringify({
+        "token": document.getElementById("admin_token").value,
+        "new_rate": document.getElementById("pixel_rate_update").value,
+      }),
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then((response) => {
+      if (response.status != "200") {
+        alert(response.statusText);
+      } else {
+        return response.text();
+      }
+    })
+    .then((text) => {
+      if (text) {
+        alert(text);
+      }
+    })
+  }
+  </script>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+</body>
+</html>
