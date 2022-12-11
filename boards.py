@@ -107,7 +107,7 @@ class BoardManager:
             for update in updates:
                 update["time"] = now
             self.updates.insert_many(updates)
-            
+
         return self.stats
 
     def update_current_board(self, row, col, color, author, serverManager, id):
@@ -178,3 +178,14 @@ class BoardManager:
     def change_pixel_rate(new_rate: int):
         global PIXEL_RATE
         PIXEL_RATE = new_rate
+
+    def set_enabled_state(is_enabled):
+        global BOARD_DISABLED
+
+        if is_enabled:
+            BOARD_DISABLED = False
+        else:
+            BOARD_DISABLED = True
+
+        return PIXEL_RATE
+
