@@ -198,3 +198,6 @@ class BoardManager:
 
     def get_stats(self):
         return self.stats
+
+    def get_palette(self):
+        return INITIAL_PALETTE
