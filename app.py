@@ -200,14 +200,7 @@ def GET_settings():
 def return_board():
     # Get the current board and return just the pixels
     board = board_manager.get_current_board()
-
-    # Check if the client has this cached
-    if request.if_none_match.contains(board["hash"]):
-        return "", 304
     resp = make_response(jsonify({ "pixels": board["pixels"] }))
-
-    # Add the ETag
-    resp.headers["ETag"] = board["hash"]
     return resp
 
 

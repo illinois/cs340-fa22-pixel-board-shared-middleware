@@ -1,6 +1,5 @@
 from os import getenv, path, makedirs, environ
 from datetime import datetime
-import hashlib
 import random
 
 from bson.objectid import ObjectId
@@ -43,7 +42,7 @@ class BoardManager:
     def __init__(self, db: Database):
         self.board = db["boards"]
         self.updates = db["updates"]
-        self.hash = hashlib.md5()
+        # self.hash = hashlib.md5()
 
         self.statsDB = db["stats"]
         self.stats = self.statsDB.find_one({}) or {"pixels": 0, "unnecessaryPixels": 0}
@@ -101,8 +100,8 @@ class BoardManager:
         )
 
         # Update the board hash
-        self.update_hash(self.cache["palette"], self.cache["pixels"])
-        self.cache["hash"] = self.hash.hexdigest()
+        # self.update_hash(self.cache["palette"], self.cache["pixels"])
+        # self.cache["hash"] = self.hash.hexdigest()
 
         # Add board updates to database collection
         now = datetime.utcnow()
@@ -130,8 +129,8 @@ class BoardManager:
             "lastModify": [["" for _ in range(width)] for _ in range(height)]
         }
         # Hash the empty board
-        self.update_hash(palette, board["pixels"])
-        board["hash"] = self.hash.hexdigest()
+        # self.update_hash(palette, board["pixels"])
+        # board["hash"] = self.hash.hexdigest()
 
         # Insert to DB
         self.board.insert_one(board)
@@ -139,11 +138,11 @@ class BoardManager:
         # Return the board (for the cache to use)
         return board
 
-    def update_hash(self, palette, pixels):
-        palette_string = ''.join(palette)
-        pixels_strings = [''.join(map(str, row)) for row in pixels]
-        pixel_string = ''.join(pixels_strings)
-        self.hash.update((palette_string + pixel_string).encode())
+    # def update_hash(self, palette, pixels):
+    #     palette_string = ''.join(palette)
+    #     pixels_strings = [''.join(map(str, row)) for row in pixels]
+    #     pixel_string = ''.join(pixels_strings)
+    #     self.hash.update((palette_string + pixel_string).encode())
 
     def generate_gif(self):
         from PIL import Image
