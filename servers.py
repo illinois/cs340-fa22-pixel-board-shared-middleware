@@ -36,6 +36,13 @@ class ServerManager:
                 {"secret": secret},
                 {"$set": {"name": name, "author": author}}
             )
+
+            for pg in self.cache:
+                if secret == pg["secret"]:
+                    pg["name"] = name
+                    pg["author"] = author
+                    break
+                                    
             return str(found["_id"])
 
         # If not found, we create a new one and add it to the database
