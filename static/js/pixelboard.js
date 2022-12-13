@@ -189,13 +189,26 @@ let canvasListener = function(event) {
   });
 };
 
+let showInvalidSecret = () => {
+  document.getElementById("enableFrontendEditModal_error").innerHTML = `
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <div>Invalid Secret</div>
+    <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close" ></button>
+  </div>`;  
+}
+
 let enableFrontend = function(event) {
   let secret = document.getElementById("pg_secret").value;
+  split = secret.split('+');
+  if (split.length != 3) { showInvalidSecret(); return; }
+  if (split[0] != "Frontend") { showInvalidSecret(); return; }
+  netid = atob(split[1]);
+
   fetch("/register-pg", {
     method: "PUT",
     body: JSON.stringify({
-      "name": "Frontend",
-      "author": "N/A",
+      "name": netid,
+      "author": "Frontend",
       "secret": secret
     }),
     headers: { 'Content-Type': 'application/json' }
