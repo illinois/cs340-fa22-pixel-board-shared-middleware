@@ -8,6 +8,22 @@
   font-size: 80%;
 }
 
+.g1 {
+
+}
+
+.g1:nth-of-type(3n) .g4:nth-of-type(3n) {
+  content: "*";
+  border: solid 1px yellow;
+}
+
+.g4 {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border: solid 1px black;
+}
+
 
 body {
   background-color: #f8f8fb;

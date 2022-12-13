@@ -215,7 +215,11 @@ def GET_pixels():
 
 @app.route('/frontend-pixels', methods=['GET'])
 def GET_frontend_pixels():
-    return return_board()
+    board = board_manager.get_current_board()
+    return make_response(jsonify({
+        "pixels": board["pixels"],
+        "authors": board["lastModify"]
+    }))
 
 
 @app.route('/timelapse', methods=['GET'])
@@ -224,16 +228,6 @@ def GET_timelapse():
     timelapse_path = board_manager.generate_gif()
     # Serve the file here
     return send_file(timelapse_path), 200
-
-@app.route('/getPixelAuthor/<col>/<row>', methods=['GET'])
-def getPixelAuthor(col,row):
-    board = board_manager.get_current_board()
-    author = board["lastModify"][int(row)][int(col)]
-    color = board["pixels"][int(row)][int(col)]
-    return jsonify({
-        "author": author,
-        "color": color
-    }), 200
 
 @app.route('/servers', methods=['GET'])
 def GET_servers():

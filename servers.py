@@ -22,7 +22,7 @@ class ServerManager:
             return 'no author'
         found = self.collection.find_one(ObjectId(id))
         if found:
-            return found["author"]
+            return found["name"] + " (" + found["author"] + ")"
         else:
             return "id not found"
 
@@ -42,7 +42,7 @@ class ServerManager:
                     pg["name"] = name
                     pg["author"] = author
                     break
-                                    
+
             return str(found["_id"])
 
         # If not found, we create a new one and add it to the database

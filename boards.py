@@ -9,7 +9,7 @@ import numpy as np
 
 # Load the environment variables, with default fallback values
 load_dotenv()
-INITIAL_WIDTH = int(getenv("INITIAL_WIDTH") or 100)
+INITIAL_WIDTH = int(getenv("INITIAL_WIDTH") or 200)
 INITIAL_HEIGHT = int(getenv("INITIAL_HEIGHT") or 100)
 
 if getenv("INITIAL_PALETTE"):

@@ -6,6 +6,10 @@ var _enableToken = undefined;
 var _colorChoice = 0;
 var _previousChoice = 0;
 let _frontend_timeout = 0;
+var _pixels = undefined;
+var _authors = undefined;
+
+const ZOOM_SCALE = 6;
 
 // Fetch the settings:
 fetch("/settings")
@@ -21,13 +25,102 @@ if (_frontend_token) {
   document.getElementById("pg_secret").value = _frontend_token;
 }
 
+let _lastEvent = undefined;
+let mouseoverEvent = function(e) {
+  function getCursorPosition(canvas, event) {
+    var elemLeft = canvas.offsetLeft + canvas.clientLeft;
+    var elemTop = canvas.offsetTop + canvas.clientTop;
+    x = parseInt((event.pageX - elemLeft) / ZOOM_SCALE);
+    y = parseInt((event.pageY - elemTop) / ZOOM_SCALE);
+    return [x, y];
+  }
+
+  if (e) {
+    e.preventDefault();
+    _lastEvent = e;
+  } else {
+    e = _lastEvent;
+  }
+  var [col,row] = getCursorPosition(canvas, e);
+  const hidden = document.getElementById('mouse_over');
+  hidden.style.visibility = 'visible';
+  var tmpcol = e.clientX + 15;
+  var tmprow = e.clientY + 15;
+  hidden.style.position = "absolute";
+  hidden.style.left = `${tmpcol}px`;
+  hidden.style.top = `${tmprow}px`;
+
+  let getRowHTML = function(row, col) {
+    html = `<div class="g1">`;
+    if (row < 0 || row >= _settings.height) {
+      html += `<div class="g4" style="background-color: white;">&mdash;</div>`;
+      html += `<div class="g4" style="background-color: white;">&mdash;</div>`;
+      html += `<div class="g4" style="background-color: white;">&mdash;</div>`;
+      html += `<div class="g4" style="background-color: white;">&mdash;</div>`;
+      html += `<div class="g4" style="background-color: white;">&mdash;</div>`;          
+    } else {
+      if (col > 1) {
+        html += `<div class="g4" style="background-color: ${_settings.palette[_pixels[row][col - 2]]};">&nbsp;</div>`;
+      } else {
+        html += `<div class="g4" style="background-color: white;">&mdash;</div>`;
+      }
+
+      if (col > 0) {
+        html += `<div class="g4" style="background-color: ${_settings.palette[_pixels[row][col - 1]]};">&nbsp;</div>`;
+      } else {
+        html += `<div class="g4" style="background-color: white;">&mdash;</div>`;
+      }
+
+      html += `<div class="g4" style="background-color: ${_settings.palette[_pixels[row][col]]};">&nbsp;</div>`;
+
+      if (col + 1 < _settings.width) {
+        html += `<div class="g4" style="background-color: ${_settings.palette[_pixels[row][col + 1]]};">&nbsp;</div>`;
+      } else {
+        html += `<div class="g4" style="background-color: white;">&mdash;</div>`;
+      }
+
+      if (col + 2 < _settings.width) {
+        html += `<div class="g4" style="background-color: ${_settings.palette[_pixels[row][col + 2]]};">&nbsp;</div>`;
+      } else {
+        html += `<div class="g4" style="background-color: white;">&mdash;</div>`;
+      }      
+    }
+    html += `</div>`;
+    return html;
+  }
+
+  let html = `<div class="grid">`;
+  html += getRowHTML(row - 2, col);
+  html += getRowHTML(row - 1, col);
+  html += getRowHTML(row, col);
+  html += getRowHTML(row + 1, col);
+  html += getRowHTML(row + 2, col);
+  html += `</div>`;
+
+
+  hidden.innerHTML =`
+  ${html}
+  Pixel Color: ${_settings.palette[_pixels[row][col]]}
+  <div class="small">Row: ${row}, Column: ${col}</div>
+  <div class="small">${_authors[row][col]}</div>
+  `;
+  /*
+  fetch(`/getPixelAuthor/${col}/${row}`)
+  .then((response) => response.json())
+  .then((data) => {
+
+  })
+  */
+}
+
+
 // Initialize the canvas:
 let initBoard = function() {
   _canvas = document.createElement("canvas");
-  _canvas.height = (_settings.height - 1) * 3;
-  _canvas.width = (_settings.width - 1) * 3;
+  _canvas.height = (_settings.height - 1) * ZOOM_SCALE;
+  _canvas.width = (_settings.width - 1) * ZOOM_SCALE;
   _canvas.id = "canvas"
-  _canvas.getContext("2d").scale(3, 3);
+  _canvas.getContext("2d").scale(ZOOM_SCALE, ZOOM_SCALE);
 
   document.getElementById("pixelboard").appendChild(_canvas);
 
@@ -36,7 +129,8 @@ let initBoard = function() {
   .then((response) => response.json())
   .then((data) => {
     let ctx = _canvas.getContext("2d");
-    let pixels = data.pixels;
+    let pixels = _pixels = data.pixels;
+    _authors = data.authors;
 
     for (let y = 0; y < pixels.length; y++) {
       for (let x = 0; x < pixels[y].length; x++) {
@@ -55,46 +149,29 @@ let initBoard = function() {
     _sio.on('pixel update', function(msg){
       const x = msg['col'];
       const y = msg['row'];
-      const color_idx = msg['color'];
+      const color_idx = +msg['color'];
+      const author = msg['author'];
 
+      _pixels[y][x] = color_idx;
+      _authors[y][x] = author;
       const color = _settings.palette[color_idx];
 
       let ctx = _canvas.getContext("2d");
       ctx.fillStyle = color;
       ctx.fillRect(x, y, 1, 1);
 
+      const hidden = document.getElementById('mouse_over');
+      if (hidden.style.visibility != 'hidden') {
+        mouseoverEvent();
+      }
+
       document.getElementById("statsDisplay").innerHTML = `${msg["pixels"]} pixels generated (${msg["unnecessaryPixels"]} unnecessary, ${(100 * msg["unnecessaryPixels"] / msg["pixels"]).toFixed(2)}%)`
     })
 
     // Hover: 
     const canvas = document.getElementById('canvas')
-    function getCursorPosition(canvas, event) {
-      var elemLeft = canvas.offsetLeft + canvas.clientLeft;
-      var elemTop = canvas.offsetTop + canvas.clientTop;
-      x = parseInt((event.pageX - elemLeft) / 3);
-      y = parseInt((event.pageY - elemTop) / 3);
-      return [x, y];
-    }
-    canvas.addEventListener('mousemove', function(e) {
-      e.preventDefault();
-      var [col,row] = getCursorPosition(canvas, e);
-      const hidden = document.getElementById('mouse_over');
-      hidden.style.visibility = 'visible';
-      var tmpcol = e.clientX + 20;
-      var tmprow = e.clientY + 20;
-      hidden.style.position = "absolute";
-      hidden.style.left = `${tmpcol}px`;
-      hidden.style.top = `${tmprow}px`;
-      
-      fetch(`/getPixelAuthor/${col}/${row}`)
-      .then((response) => response.json())
-      .then((data) => {
-        hidden.innerHTML =`
-        Pixel Color: ${_settings.palette[+data.color]}
-        <div class="small">${data.author}</div>
-        `;
-      })
-    })
+
+    canvas.addEventListener('mousemove', mouseoverEvent);
     canvas.addEventListener('mouseout', (event) => {
       const hidden = document.getElementById('mouse_over');
       hidden.style.visibility = 'hidden';
@@ -157,8 +234,8 @@ let canvasListener = function(event) {
   var elem = document.getElementById('canvas'),
   elemLeft = elem.offsetLeft + elem.clientLeft,
   elemTop = elem.offsetTop + elem.clientTop,
-  col = parseInt((event.pageX - elemLeft) / 3),
-  row = parseInt((event.pageY - elemTop) / 3);
+  col = parseInt((event.pageX - elemLeft) / ZOOM_SCALE),
+  row = parseInt((event.pageY - elemTop) / ZOOM_SCALE);
   fetch(`/update-pixel`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -199,10 +276,12 @@ let showInvalidSecret = () => {
 
 let enableFrontend = function(event) {
   let secret = document.getElementById("pg_secret").value;
+
+  let netid = "Unknown";
   split = secret.split('+');
-  if (split.length != 3) { showInvalidSecret(); return; }
-  if (split[0] != "Frontend") { showInvalidSecret(); return; }
-  netid = atob(split[1]);
+  if (split.length == 3 && split[0] == "Frontend") {
+    netid = atob(split[1]);
+  } 
 
   fetch("/register-pg", {
     method: "PUT",
