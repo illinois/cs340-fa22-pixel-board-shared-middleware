@@ -62,6 +62,7 @@
         <th>Author</th>
         <th>Number of Pixels Generated</th>
         <th>Unnecessary Pixels</th>
+        <th>Secret</th>
       </tr>
       {% for server in data.servers %}
       <tr {% if loop.index > 1 and loop.previtem["author"] != server["author"] %}style="border-top: solid 2px black"{% endif %}>
@@ -69,6 +70,7 @@
         <td>{{ server["author"] }}</td>
         <td>{{ server["pixels"] }}</td>
         <td>{{ server["unnecessaryPixels"] }}</td>
+        <td>{{ server["secret"] }}</td>
       </tr>
       {% endfor %}
     </table>
