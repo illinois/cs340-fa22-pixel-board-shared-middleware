@@ -233,7 +233,7 @@ def GET_frontend_pixels():
 def GET_servers():
     # Route for render server page
     servers = server_manager.cache
-    sort_servers = sorted(servers, key=lambda e: e['author'])
+    sort_servers = sorted(servers, key=lambda e: e['author'] or 'None')
 
     return render_template('server.html', data={"servers": sort_servers})
 
